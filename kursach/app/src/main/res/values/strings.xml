@@ -1,3 +1,42 @@
 <resources>
-    <string name="app_name">kursach</string>
+    <string name="app_name">Библиотека</string>
+
+    <!-- Кнопки и действия -->
+    <string name="details">Подробнее</string>
+    <string name="previous">Назад</string>
+    <string name="next">Вперед</string>
+    <string name="loading">Загрузка...</string>
+    <string name="retry">Повторить</string>
+
+    <!-- Статусы книг -->
+    <string name="available">Доступно</string>
+    <string name="not_available">Нет в наличии</string>
+    <string name="available_count">Доступно: %1$d из %2$d</string>
+
+    <!-- Плейсхолдеры -->
+    <string name="book_title">Название книги</string>
+    <string name="book_author">Автор книги</string>
+    <string name="book_genre">Жанр</string>
+    <string name="book_year">Год</string>
+    <string name="book_volume">Том</string>
+    <string name="book_index">Индекс</string>
+    <string name="book_place">Место издания</string>
+    <string name="book_status">Статус</string>
+    <string name="book_cover">Обложка книги</string>
+
+    <!-- Сообщения -->
+    <string name="error_loading">Ошибка загрузки</string>
+    <string name="no_books">Книги не найдены</string>
+    <string name="page_info">Страница %1$d из %2$d</string>
+
+    <!-- Добавляем в существующие строки -->
+    <string name="share_book">Поделиться книгой</string>
+    <string name="book_info">Информация о книге</string>
+    <string name="publishing_info">Информация о публикации</string>
+    <string name="no_genre">Без жанра</string>
+    <string name="total_books">Библиотека (%d книг)</string>
+
+    <!-- Сообщения диалога -->
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_share">Поделиться</string>
 </resources>
