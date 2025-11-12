@@ -7,16 +7,7 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- Заголовок -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/app_name"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="@color/black"
-        android:gravity="center"
-        android:layout_marginBottom="16dp" />
+    <!-- УБИРАЕМ заголовок - теперь он в базовом тулбаре -->
 
     <!-- Пагинация -->
     <LinearLayout

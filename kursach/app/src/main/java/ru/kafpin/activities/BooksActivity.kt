@@ -1,7 +1,6 @@
 package ru.kafpin.activities
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -17,25 +16,27 @@ import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.launch
 import ru.kafpin.viewmodels.BookViewModelFactory
 
-class BooksActivity : AppCompatActivity() {
+class BooksActivity : BaseActivity<ActivityBooksBinding>() {
 
-    private lateinit var binding: ActivityBooksBinding
     private val viewModel: BookViewModel by viewModels {
         BookViewModelFactory(this)
     }
     private lateinit var adapter: BooksAdapter
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityBooksBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun inflateBinding(): ActivityBooksBinding {
+        return ActivityBooksBinding.inflate(layoutInflater)
+    }
 
+    override fun setupUI() {
         setupRecyclerView()
         setupSwipeRefresh()
         setupObservers()
         setupClickListeners()
 
-        // Показываем начальное состояние
+        // Настраиваем тулбар
+        setToolbarTitle("Библиотека")
+        enableBackButton(false) // На главном экране скрываем кнопку назад
+
         showLoadingState()
     }
 
@@ -52,7 +53,6 @@ class BooksActivity : AppCompatActivity() {
             }, 10000)
         }
 
-        // Настраиваем цвета индикатора (опционально)
         binding.swipeRefreshLayout.setColorSchemeResources(
             android.R.color.holo_blue_bright,
             android.R.color.holo_green_light,
@@ -89,8 +89,16 @@ class BooksActivity : AppCompatActivity() {
                     } else {
                         showEmptyState()
                     }
-                    // Кружок должен остановиться когда данные обновились
                     stopSwipeRefresh()
+                }
+            }
+        }
+
+        // Наблюдаем за состоянием сети
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.isOnline.collect { isOnline ->
+                    updateToolbarWithNetworkStatus(isOnline)
                 }
             }
         }
@@ -118,7 +126,7 @@ class BooksActivity : AppCompatActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.pageInfo.collect { info ->
                     binding.pageIndicator.text = info
-                    supportActionBar?.title = "Библиотека (${viewModel.totalBooksCount} книг)"
+                    updateToolbarWithBookCount()
                 }
             }
         }
@@ -130,7 +138,6 @@ class BooksActivity : AppCompatActivity() {
                     if (isLoading) {
                         showLoadingState()
                     } else {
-                        // Когда загрузка завершилась - останавливаем кружок
                         stopSwipeRefresh()
                     }
                     binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
@@ -144,7 +151,6 @@ class BooksActivity : AppCompatActivity() {
                 viewModel.errorMessage.collect { errorMessage ->
                     errorMessage?.let { message ->
                         showErrorState(message)
-                        // При ошибке тоже останавливаем кружок
                         stopSwipeRefresh()
                     }
                 }
@@ -153,9 +159,33 @@ class BooksActivity : AppCompatActivity() {
     }
 
     /**
-     * Останавливает анимацию SwipeRefreshLayout
-     * Вызывается когда данные загружены или произошла ошибка
+     * Обновляет тулбар с информацией о сети и количестве книг
      */
+    private fun updateToolbarWithNetworkStatus(isOnline: Boolean) {
+        Log.d("BooksActivity", "Network status changed: $isOnline")
+
+        val networkStatus = if (isOnline) "✅ Онлайн" else "🔴 Офлайн"
+        val bookCount = viewModel.totalBooksCount
+        setToolbarTitle("Библиотека ($bookCount книг) $networkStatus")
+    }
+
+    /**
+     * Обновляет только количество книг в тулбаре
+     */
+    private fun updateToolbarWithBookCount() {
+        val currentTitle = supportActionBar?.title?.toString() ?: ""
+        val bookCount = viewModel.totalBooksCount
+
+        // Сохраняем статус сети если он есть
+        val networkStatus = when {
+            currentTitle.contains("✅") -> " ✅ Онлайн"
+            currentTitle.contains("🔴") -> " 🔴 Офлайн"
+            else -> ""
+        }
+
+        setToolbarTitle("Библиотека ($bookCount книг)$networkStatus")
+    }
+
     private fun stopSwipeRefresh() {
         if (binding.swipeRefreshLayout.isRefreshing) {
             Log.d("BooksActivity", "Stopping swipe refresh animation")
@@ -189,7 +219,6 @@ class BooksActivity : AppCompatActivity() {
         binding.swipeRefreshLayout.isEnabled = false
         binding.pageIndicator.text = "Загрузка..."
 
-        // Блокируем кнопки пагинации во время загрузки
         binding.prevPageButton.isEnabled = false
         binding.nextPageButton.isEnabled = false
     }
@@ -199,7 +228,6 @@ class BooksActivity : AppCompatActivity() {
         binding.swipeRefreshLayout.visibility = View.VISIBLE
         binding.errorLayout.visibility = View.GONE
         binding.swipeRefreshLayout.isEnabled = true
-        // НЕ останавливаем здесь кружок - это делает stopSwipeRefresh()
     }
 
     private fun showErrorState(errorMessage: String) {
@@ -210,9 +238,7 @@ class BooksActivity : AppCompatActivity() {
 
         binding.errorText.text = errorMessage
         binding.pageIndicator.text = "Ошибка"
-        // НЕ останавливаем здесь кружок - это делает stopSwipeRefresh()
 
-        // Блокируем кнопки пагинации при ошибке
         binding.prevPageButton.isEnabled = false
         binding.nextPageButton.isEnabled = false
     }
@@ -226,9 +252,7 @@ class BooksActivity : AppCompatActivity() {
         binding.errorText.text = "Книги не найдены"
         binding.retryButton.visibility = View.VISIBLE
         binding.pageIndicator.text = "Нет данных"
-        // НЕ останавливаем здесь кружок - это делает stopSwipeRefresh()
 
-        // Блокируем кнопки пагинации при пустом списке
         binding.prevPageButton.isEnabled = false
         binding.nextPageButton.isEnabled = false
     }
@@ -236,7 +260,6 @@ class BooksActivity : AppCompatActivity() {
     // endregion
 
     private fun showBookDetails(book: Book) {
-        // Создаем диалог с детальной информацией о книге
         val message = """
             📖 ${book.title}
             
@@ -276,11 +299,5 @@ class BooksActivity : AppCompatActivity() {
         }
 
         startActivity(Intent.createChooser(intent, "Поделиться книгой"))
-    }
-
-    // Обработка кнопки "Назад"
-    override fun onSupportNavigateUp(): Boolean {
-        onBackPressed()
-        return true
     }
 }

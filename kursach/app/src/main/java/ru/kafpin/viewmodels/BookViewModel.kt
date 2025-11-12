@@ -37,12 +37,11 @@ class BookViewModel(
     private val _pageInfo = MutableStateFlow("Страница 0 из 0")
     val pageInfo: StateFlow<String> = _pageInfo.asStateFlow()
 
+    // StateFlow для состояния сети
+    val isOnline: StateFlow<Boolean> = networkMonitor.isOnline
+
     private var currentPage = 0
     private val pageSize = 10
-
-    // Флаг чтобы не синхронизировать слишком часто
-    private var lastSyncTime = 0L
-    private val SYNC_COOLDOWN = 5 * 60 * 1000 // 5 минут
 
     init {
         Log.d(TAG, "BookViewModel initialized")
@@ -50,9 +49,6 @@ class BookViewModel(
         setupAutoSync()
     }
 
-    /**
-     * Настраивает автоматическую синхронизацию при появлении сети
-     */
     private fun setupAutoSync() {
         viewModelScope.launch {
             networkMonitor.isOnline.collect { isOnline ->
@@ -66,24 +62,50 @@ class BookViewModel(
         }
     }
 
-    /**
-     * Автоматически синхронизирует если прошло достаточно времени
-     */
+    private var lastSyncTime = 0L
+    private val SYNC_COOLDOWN = 5 * 60 * 1000 // 5 минут
+
     private fun autoSyncIfNeeded() {
+        if (_isLoading.value) {
+            Log.d(TAG, "autoSyncIfNeeded: Already loading, skipping")
+            return
+        }
+
+        if (_allBooks.value.isEmpty()) {
+            Log.d(TAG, "autoSyncIfNeeded: No local data, skipping auto-sync")
+            return
+        }
+
         val now = System.currentTimeMillis()
         val timeSinceLastSync = now - lastSyncTime
 
-        if (timeSinceLastSync > SYNC_COOLDOWN) {
-            Log.d(TAG, "Auto-syncing... (last sync was ${timeSinceLastSync/1000}s ago)")
-            syncWithServer()
-        } else {
-            Log.d(TAG, "Skipping auto-sync (last sync was ${timeSinceLastSync/1000}s ago)")
+        if (timeSinceLastSync < SYNC_COOLDOWN) {
+            Log.d(TAG, "autoSyncIfNeeded: Sync cooldown (${timeSinceLastSync/1000}s), skipping")
+            return
+        }
+
+        Log.d(TAG, "autoSyncIfNeeded: Starting auto-sync...")
+        lastSyncTime = now
+
+        // Используем refresh, но не показываем ошибки пользователю
+        viewModelScope.launch {
+            try {
+                val books = repository.getAllBooks()
+                _allBooks.value = books
+                showPage(currentPage)
+                Log.d(TAG, "autoSyncIfNeeded: Sync successful")
+            } catch (e: Exception) {
+                Log.e(TAG, "autoSyncIfNeeded: Sync failed silently", e)
+                // Не показываем ошибку пользователю - это фоновая синхронизация
+            }
         }
     }
 
-    // СУЩЕСТВУЮЩИЕ МЕТОДЫ (без изменений)
     fun loadAllBooks() {
-        if (_isLoading.value) return
+        if (_isLoading.value) {
+            Log.d(TAG, "loadAllBooks: Already loading, skipping")
+            return
+        }
 
         Log.d(TAG, "loadAllBooks: Starting load...")
         _isLoading.value = true
@@ -95,7 +117,6 @@ class BookViewModel(
                 val books = repository.getAllBooks()
                 Log.d(TAG, "loadAllBooks: Success! Received ${books.size} books")
                 _allBooks.value = books
-                lastSyncTime = System.currentTimeMillis()
                 showPage(0)
             } catch (e: Exception) {
                 Log.e(TAG, "loadAllBooks: Error - ${e.message}", e)
@@ -105,6 +126,7 @@ class BookViewModel(
                 }
             } finally {
                 _isLoading.value = false
+                Log.d(TAG, "loadAllBooks: Finished loading")
             }
         }
     }
@@ -112,8 +134,8 @@ class BookViewModel(
     fun refresh() {
         Log.d(TAG, "refresh: Manual refresh called")
 
-        // Сразу сбрасываем ошибку
         _errorMessage.value = null
+        lastSyncTime = System.currentTimeMillis()
 
         viewModelScope.launch {
             try {
@@ -126,58 +148,42 @@ class BookViewModel(
                 Log.e(TAG, "refresh: Error - ${e.message}", e)
                 _errorMessage.value = "Ошибка обновления: ${e.message}"
             } finally {
-                // ВАЖНО: всегда завершаем загрузку, даже при ошибке
                 _isLoading.value = false
                 Log.d(TAG, "refresh: Finished refresh")
             }
         }
     }
 
-    /**
-     * Синхронизация с сервером (теперь используется автоматически)
-     */
-    private fun syncWithServer() {
-        if (_isLoading.value) return
-
-        Log.d(TAG, "syncWithServer: Starting sync...")
-        _isLoading.value = true
-
-        viewModelScope.launch {
-            try {
-                Log.d(TAG, "syncWithServer: Calling repository sync...")
-                val books = repository.syncWithServer()
-                Log.d(TAG, "syncWithServer: Sync success! Received ${books.size} books")
-
-                _allBooks.value = books
-                lastSyncTime = System.currentTimeMillis()
-                showPage(currentPage)
-
-            } catch (e: Exception) {
-                Log.e(TAG, "syncWithServer: Error - ${e.message}", e)
-                // НЕ показываем ошибку пользователю - это фоновая синхронизация
-            } finally {
-                _isLoading.value = false
-            }
-        }
-    }
-
-    // ОСТАЛЬНЫЕ МЕТОДЫ БЕЗ ИЗМЕНЕНИЙ
     fun showPage(page: Int) {
         val allBooks = _allBooks.value
         Log.d(TAG, "showPage: page=$page, totalBooks=${allBooks.size}")
 
-        val safePage = when {
-            page < 0 -> 0
-            page * pageSize >= allBooks.size -> maxOf(0, (allBooks.size - 1) / pageSize)
-            else -> page
+        // ЗАЩИТА: если книг нет - показываем пустой список
+        if (allBooks.isEmpty()) {
+            _currentBooks.value = emptyList()
+            currentPage = 0
+            updatePaginationProperties()
+            return
         }
+
+        // ВЫЧИСЛЯЕМ БЕЗОПАСНУЮ СТРАНИЦУ
+        val totalPages = maxOf(1, (allBooks.size + pageSize - 1) / pageSize)
+        val safePage = page.coerceIn(0, totalPages - 1) // ← ГЛАВНОЕ ИСПРАВЛЕНИЕ!
 
         val start = safePage * pageSize
         val end = minOf(start + pageSize, allBooks.size)
 
-        if (start < allBooks.size) {
+        // ДОПОЛНИТЕЛЬНАЯ ПРОВЕРКА
+        if (start >= 0 && start < allBooks.size) {
             _currentBooks.value = allBooks.subList(start, end)
             currentPage = safePage
+            updatePaginationProperties()
+            Log.d(TAG, "showPage: Showing page $safePage (books ${start}-${end})")
+        } else {
+            Log.e(TAG, "showPage: Invalid page range")
+            // ФALLBACK: показываем первую страницу
+            _currentBooks.value = allBooks.subList(0, minOf(pageSize, allBooks.size))
+            currentPage = 0
             updatePaginationProperties()
         }
     }

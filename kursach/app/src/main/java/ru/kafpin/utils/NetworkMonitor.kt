@@ -1,49 +1,67 @@
 package ru.kafpin.utils
 
 import android.content.Context
-import android.net.ConnectivityManager
-import android.net.Network
-import android.net.NetworkCapabilities
-import android.net.NetworkRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 /**
- * Мониторит состояние сети и автоматически уведомляет о изменениях
+ * Умный мониторинг для точки доступа - проверяет доступность порта сервера
  */
 class NetworkMonitor(context: Context) {
-
-    private val connectivityManager =
-        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
     private val _isOnline = MutableStateFlow(false)
     val isOnline: StateFlow<Boolean> = _isOnline
 
-    private val networkCallback = object : ConnectivityManager.NetworkCallback() {
-        override fun onAvailable(network: Network) {
-            _isOnline.value = true
-        }
+    // IP и порт твоего сервера
+    private val serverIp = "192.168.43.210"
+    private val serverPort = 8080
 
-        override fun onLost(network: Network) {
-            _isOnline.value = false
-        }
-    }
+    // Флаг для остановки проверки
+    private var isChecking = true
 
     fun start() {
-        val networkRequest = NetworkRequest.Builder()
-            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            .build()
+        println("🌐 NetworkMonitor: HOTSPOT MODE - checking server port $serverPort")
+        isChecking = true
 
-        connectivityManager.registerNetworkCallback(networkRequest, networkCallback)
+        // Первая проверка сразу
+        checkServerAvailability()
 
-        // Проверяем текущее состояние
-        val currentNetwork = connectivityManager.activeNetwork
-        val capabilities = connectivityManager.getNetworkCapabilities(currentNetwork)
-        _isOnline.value = capabilities != null &&
-                capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+        // Запускаем фоновую проверку каждые 10 секунд
+        Thread {
+            while (isChecking) {
+                Thread.sleep(10000) // Ждём 10 секунд
+                if (isChecking) {
+                    checkServerAvailability()
+                }
+            }
+            println("🌐 NetworkMonitor: Stopped checking")
+        }.start()
+    }
+
+    private fun checkServerAvailability() {
+        Thread {
+            try {
+                // Пытаемся подключиться к порту сервера
+                java.net.Socket().use { socket ->
+                    socket.connect(java.net.InetSocketAddress(serverIp, serverPort), 3000)
+                    // Если подключились успешно - сервер доступен
+                    if (!_isOnline.value) {
+                        _isOnline.value = true
+                        println("🌐 NetworkMonitor: ✅ Server port $serverPort is OPEN - ONLINE")
+                    }
+                }
+            } catch (e: Exception) {
+                // Не смогли подключиться - сервер недоступен
+                if (_isOnline.value) {
+                    _isOnline.value = false
+                    println("🌐 NetworkMonitor: ❌ Server port $serverPort is CLOSED - OFFLINE: ${e.message}")
+                }
+            }
+        }.start()
     }
 
     fun stop() {
-        connectivityManager.unregisterNetworkCallback(networkCallback)
+        isChecking = false
+        println("🌐 NetworkMonitor: Stopping network monitoring")
     }
 }
