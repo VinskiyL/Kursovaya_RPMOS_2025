@@ -1,7 +1,6 @@
 package ru.kafpin.activities
 
 import android.content.Intent
-import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.activity.viewModels
@@ -79,6 +78,20 @@ class BooksActivity : BaseActivity<ActivityBooksBinding>() {
     }
 
     private fun setupObservers() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.isLoading.collect { isLoading ->
+                    Log.d("BooksActivity", "Loading state: $isLoading")
+                    if (isLoading) {
+                        showLoadingState()
+                    } else {
+                        stopSwipeRefresh()
+                        binding.progressBar.visibility = View.GONE
+                    }
+                }
+            }
+        }
+
         // Наблюдаем за текущими книгами
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {

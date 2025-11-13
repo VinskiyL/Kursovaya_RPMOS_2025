@@ -40,11 +40,14 @@ class BookViewModel(
     // StateFlow для состояния сети
     val isOnline: StateFlow<Boolean> = networkMonitor.isOnline
 
+    private var isInitialLoad = true
+
     private var currentPage = 0
     private val pageSize = 10
 
     init {
         Log.d(TAG, "BookViewModel initialized")
+        networkMonitor.start()
         loadAllBooks()
         setupAutoSync()
     }
@@ -54,7 +57,9 @@ class BookViewModel(
             networkMonitor.isOnline.collect { isOnline ->
                 if (isOnline) {
                     Log.d(TAG, "Network is available - checking if we should sync...")
-                    autoSyncIfNeeded()
+                    if (!isInitialLoad) {
+                        autoSyncIfNeeded()
+                    }
                 } else {
                     Log.d(TAG, "Network is unavailable")
                 }
@@ -113,17 +118,38 @@ class BookViewModel(
 
         viewModelScope.launch {
             try {
-                Log.d(TAG, "loadAllBooks: Calling repository...")
-                val books = repository.getAllBooks()
-                Log.d(TAG, "loadAllBooks: Success! Received ${books.size} books")
-                _allBooks.value = books
-                showPage(0)
+                // 1. СНАЧАЛА БЫСТРО ГРУЗИМ ИЗ БАЗЫ
+                Log.d(TAG, "loadAllBooks: Loading local books first...")
+                val localBooks = repository.getLocalBooks()
+                if (localBooks.isNotEmpty()) {
+                    Log.d(TAG, "loadAllBooks: Local books loaded: ${localBooks.size}")
+                    _allBooks.value = localBooks
+                    showPage(0)
+                }
+
+                // 2. ПАРАЛЛЕЛЬНО ПЫТАЕМСЯ ОБНОВИТЬСЯ С СЕРВЕРА
+                Log.d(TAG, "loadAllBooks: Trying to sync with server...")
+                val freshBooks = repository.getAllBooks() // Этот метод теперь оффлайн-первый
+
+                // 3. ЕСЛИ ПОЛУЧИЛИ СВЕЖИЕ ДАННЫЕ - ОБНОВЛЯЕМ
+                if (freshBooks != localBooks) {
+                    Log.d(TAG, "loadAllBooks: Got fresh data: ${freshBooks.size} books")
+                    _allBooks.value = freshBooks
+                    showPage(currentPage)
+                }
+
+                if (isInitialLoad) {
+                    isInitialLoad = false
+                    lastSyncTime = System.currentTimeMillis()
+                }
+
             } catch (e: Exception) {
                 Log.e(TAG, "loadAllBooks: Error - ${e.message}", e)
                 _errorMessage.value = "Ошибка загрузки: ${e.message}"
                 if (_allBooks.value.isEmpty()) {
                     _currentBooks.value = emptyList()
                 }
+                isInitialLoad = false
             } finally {
                 _isLoading.value = false
                 Log.d(TAG, "loadAllBooks: Finished loading")
@@ -197,8 +223,12 @@ class BookViewModel(
         _pageInfo.value = "Страница ${currentPage + 1} из $totalPages"
     }
 
-    fun nextPage() = showPage(currentPage + 1)
-    fun previousPage() = showPage(currentPage - 1)
+    fun nextPage(){
+        if (hasNextPage.value) showPage(currentPage + 1)
+    }
+    fun previousPage() {
+        if (hasPreviousPage.value) showPage(currentPage - 1)
+    }
 
     val totalBooksCount: Int
         get() = _allBooks.value.size

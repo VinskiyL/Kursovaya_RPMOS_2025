@@ -18,9 +18,12 @@ class NetworkMonitor(context: Context) {
 
     // Флаг для остановки проверки
     private var isChecking = true
+    private var checkThread: Thread? = null
 
     fun start() {
         println("🌐 NetworkMonitor: HOTSPOT MODE - checking server port $serverPort")
+
+        stop()
         isChecking = true
 
         // Первая проверка сразу
@@ -43,7 +46,7 @@ class NetworkMonitor(context: Context) {
             try {
                 // Пытаемся подключиться к порту сервера
                 java.net.Socket().use { socket ->
-                    socket.connect(java.net.InetSocketAddress(serverIp, serverPort), 3000)
+                    socket.connect(java.net.InetSocketAddress(serverIp, serverPort), 1000)
                     // Если подключились успешно - сервер доступен
                     if (!_isOnline.value) {
                         _isOnline.value = true
@@ -62,6 +65,8 @@ class NetworkMonitor(context: Context) {
 
     fun stop() {
         isChecking = false
+        checkThread?.interrupt()
+        checkThread = null
         println("🌐 NetworkMonitor: Stopping network monitoring")
     }
 }
