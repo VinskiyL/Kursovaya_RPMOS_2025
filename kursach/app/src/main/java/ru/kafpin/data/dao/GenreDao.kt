@@ -17,4 +17,10 @@ interface GenreDao {
 
     @Query("DELETE FROM genres")
     suspend fun clearAllGenres()
+
+    @Query("SELECT * FROM genres WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%'")
+    suspend fun searchGenres(query: String): List<GenreEntity>
+
+    @Query("SELECT * FROM genres WHERE id IN (:genreIds)")
+    suspend fun getGenresByIds(genreIds: List<Long>): List<GenreEntity>
 }

@@ -5,19 +5,24 @@ import ru.kafpin.data.models.BookAuthorCrossRef
 
 @Dao
 interface BookAuthorDao {
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBookAuthorRelations(relations: List<BookAuthorCrossRef>)
 
-    @Query("SELECT authorId FROM book_authors WHERE bookId = :bookId")
+    @Query("SELECT * FROM bookauthorcrossref WHERE bookId = :bookId")
+    suspend fun getAuthorsForBook(bookId: Long): List<BookAuthorCrossRef>
+
+    @Query("SELECT * FROM bookauthorcrossref WHERE authorId = :authorId")
+    suspend fun getBooksForAuthor(authorId: Long): List<BookAuthorCrossRef>
+
+    @Query("SELECT * FROM bookauthorcrossref")
+    suspend fun getAllRelations(): List<BookAuthorCrossRef>
+
+    @Query("DELETE FROM bookauthorcrossref")
+    suspend fun clearAllRelations()
+
+    @Query("SELECT authorId FROM bookauthorcrossref WHERE bookId = :bookId")
     suspend fun getAuthorIdsForBook(bookId: Long): List<Long>
 
-    @Query("SELECT bookId FROM book_authors WHERE authorId = :authorId")
+    @Query("SELECT bookId FROM bookauthorcrossref WHERE authorId = :authorId")
     suspend fun getBookIdsForAuthor(authorId: Long): List<Long>
-
-    @Query("DELETE FROM book_authors WHERE bookId = :bookId")
-    suspend fun deleteRelationsForBook(bookId: Long)
-
-    @Query("DELETE FROM book_authors")
-    suspend fun clearAllRelations()
 }

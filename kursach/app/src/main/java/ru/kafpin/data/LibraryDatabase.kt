@@ -24,7 +24,7 @@ import ru.kafpin.data.models.BookGenreCrossRef
         BookAuthorCrossRef::class,
         BookGenreCrossRef::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class LibraryDatabase : RoomDatabase() {
@@ -45,7 +45,9 @@ abstract class LibraryDatabase : RoomDatabase() {
                     context.applicationContext,
                     LibraryDatabase::class.java,
                     "library.db"
-                ).build()
+                )
+                    .fallbackToDestructiveMigration(true)
+                    .build()
                 INSTANCE = instance
                 instance
             }

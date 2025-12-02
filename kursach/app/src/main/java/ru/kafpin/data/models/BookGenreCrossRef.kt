@@ -1,12 +1,12 @@
 package ru.kafpin.data.models
 
 import androidx.room.Entity
+import androidx.room.PrimaryKey
 
-@Entity(
-    tableName = "book_genres",
-    primaryKeys = ["bookId", "genreId"]
-)
+@Entity
 data class BookGenreCrossRef(
+    @PrimaryKey
+    val id: Long,
     val bookId: Long,
     val genreId: Long
 )

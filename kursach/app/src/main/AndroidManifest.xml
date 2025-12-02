@@ -16,11 +16,14 @@
         android:theme="@style/Theme.Kursach"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".activities.BookDetailsActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.MainActivity"
             android:exported="false" />
         <activity
             android:name=".activities.BooksActivity"
-            android:exported="true"><!-- место для главной активности -->
+            android:exported="true"> <!-- место для главной активности -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

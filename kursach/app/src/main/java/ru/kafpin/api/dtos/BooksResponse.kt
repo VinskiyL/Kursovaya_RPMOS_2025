@@ -3,5 +3,5 @@ import com.google.gson.annotations.SerializedName
 import ru.kafpin.api.models.Book
 
 data class BooksResponse(
-    @SerializedName("content") val books: List<Book> // Все книги сразу
+    @SerializedName("content") val books: List<Book>
 )

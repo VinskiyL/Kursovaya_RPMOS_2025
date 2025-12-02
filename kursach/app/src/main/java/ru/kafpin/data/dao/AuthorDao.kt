@@ -17,4 +17,10 @@ interface AuthorDao {
 
     @Query("DELETE FROM authors")
     suspend fun clearAllAuthors()
+
+    @Query("SELECT * FROM authors WHERE LOWER(surname) LIKE '%' || LOWER(:query) || '%' OR LOWER(name) LIKE '%' || LOWER(:query) || '%'")
+    suspend fun searchAuthors(query: String): List<AuthorEntity>
+
+    @Query("SELECT * FROM authors WHERE id IN (:authorIds)")
+    suspend fun getAuthorsByIds(authorIds: List<Long>): List<AuthorEntity>
 }

@@ -1,4 +1,5 @@
 package ru.kafpin.api
+
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -24,7 +25,9 @@ object ApiClient {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-    val bookService: BookService by lazy {
-        retrofit.create(BookService::class.java)
+    // Объединенный сервис для всех API вызовов
+    val apiService: ApiService by lazy {
+        retrofit.create(ApiService::class.java)
     }
+
 }

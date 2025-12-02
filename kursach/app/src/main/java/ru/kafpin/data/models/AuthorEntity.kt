@@ -7,6 +7,8 @@ import androidx.room.PrimaryKey
 data class AuthorEntity(
     @PrimaryKey
     val id: Long,
-    val name: String,
+    val name: String?,
+    val surname: String,
+    val patronymic: String?,
     val lastSynced: Long = System.currentTimeMillis() // для синхронизации
 )

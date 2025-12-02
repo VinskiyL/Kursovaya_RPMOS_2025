@@ -22,3 +22,18 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         }
     }
 }
+
+/*class MainActivity : AppCompatActivity() {
+    private lateinit var syncService: SmartSyncService
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        syncService = SmartSyncService(this)
+
+        // Запускаем фоновую синхронизацию при старте
+        lifecycleScope.launch {
+            syncService.syncIfNeeded()
+        }
+    }
+}*/

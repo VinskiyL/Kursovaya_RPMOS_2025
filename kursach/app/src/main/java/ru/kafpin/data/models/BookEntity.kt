@@ -8,7 +8,7 @@ data class BookEntity(
     @PrimaryKey
     val id: Long,
     val index: String,
-    val authorsMark: String, // временно, пока не сделаем связи
+    val authorsMark: String,
     val title: String,
     val placePublication: String,
     val informationPublication: String,

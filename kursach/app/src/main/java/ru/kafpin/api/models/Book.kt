@@ -17,13 +17,4 @@ data class Book(
     @SerializedName("quantityRemaining") val quantityRemaining: Int,
     @SerializedName("cover") val cover: String?,
     @SerializedName("datePublication") val datePublication: String
-) : Parcelable {
-
-    val isAvailable: Boolean
-        get() = quantityRemaining > 0
-    val authorDisplay: String
-        get() = authorsMark
-
-    val genreDisplay: String
-        get() = "Художественная литература"
-}
+) : Parcelable

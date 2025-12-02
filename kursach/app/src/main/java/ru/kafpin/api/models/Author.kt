@@ -6,6 +6,15 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class Author(
-    @SerializedName("id") val id: Long,
-    @SerializedName("name") val name: String
+    @SerializedName("id")
+    val id: Long,
+
+    @SerializedName("authorSurname")
+    val authorSurname: String,
+
+    @SerializedName("authorName")
+    val authorName: String?,
+
+    @SerializedName("authorPatronymic")
+    val authorPatronymic: String?
 ) : Parcelable

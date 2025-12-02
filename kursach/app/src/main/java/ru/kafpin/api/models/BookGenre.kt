@@ -6,9 +6,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class BookGenre(
-    @SerializedName("id")
     val id: Long,
-
-    @SerializedName("genre")
-    val genre: Genre?
+    val bookId: Long,
+    val genreId: Long
 ) : Parcelable
