@@ -27,7 +27,6 @@ interface BookDao {
     @Query("SELECT COUNT(*) FROM books")
     suspend fun getBooksCount(): Int
 
-    // BookDao.kt
     @Query("SELECT * FROM books WHERE LOWER(title) LIKE '%' || LOWER(:query) || '%'")
     suspend fun searchBooksByTitle(query: String): List<BookEntity>
 
@@ -37,7 +36,7 @@ interface BookDao {
     JOIN authors a ON ba.authorId = a.id
     WHERE LOWER(a.surname) LIKE '%' || LOWER(:query) || '%' 
        OR LOWER(a.name) LIKE '%' || LOWER(:query) || '%'
-""")
+    """)
     suspend fun searchBooksByAuthor(query: String): List<BookEntity>
 
     @Query("""
@@ -45,6 +44,6 @@ interface BookDao {
     JOIN bookgenrecrossref bg ON b.id = bg.bookId
     JOIN genres g ON bg.genreId = g.id
     WHERE LOWER(g.name) LIKE '%' || LOWER(:query) || '%'
-""")
+    """)
     suspend fun searchBooksByGenre(query: String): List<BookEntity>
 }

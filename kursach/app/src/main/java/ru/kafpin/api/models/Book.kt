@@ -16,5 +16,5 @@ data class Book(
     @SerializedName("quantityTotal") val quantityTotal: Int,
     @SerializedName("quantityRemaining") val quantityRemaining: Int,
     @SerializedName("cover") val cover: String?,
-    @SerializedName("datePublication") val datePublication: String
+    @SerializedName("datePublication") val datePublication: String,
 ) : Parcelable

@@ -3,7 +3,7 @@ package ru.kafpin.data.models
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity
+@Entity(tableName = "bookgenrecrossref")
 data class BookGenreCrossRef(
     @PrimaryKey
     val id: Long,

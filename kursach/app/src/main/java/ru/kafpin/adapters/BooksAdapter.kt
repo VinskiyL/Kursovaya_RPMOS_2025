@@ -8,16 +8,15 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import ru.kafpin.R
-import ru.kafpin.api.models.Book
+import ru.kafpin.data.models.BookWithDetails
 import ru.kafpin.databinding.ItemBookBinding
 import ru.kafpin.utils.loadImage
 
 class BooksAdapter(
-    private val onItemClick: (Book) -> Unit
-) : ListAdapter<Book, BooksAdapter.BookViewHolder>(BookDiffCallback()) {
+    private val onItemClick: (BookWithDetails) -> Unit
+) : ListAdapter<BookWithDetails, BooksAdapter.BookViewHolder>(BookWithDetailsDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BookViewHolder {
-        Log.d("BooksAdapter", "onCreateViewHolder()")
         val binding = ItemBookBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
@@ -27,24 +26,7 @@ class BooksAdapter(
     }
 
     override fun onBindViewHolder(holder: BookViewHolder, position: Int) {
-        Log.d("BooksAdapter", "onBindViewHolder() position: $position")
-        val book = getItem(position)
-        Log.d("BooksAdapter", "Book at $position: ${book.title} (ID: ${book.id})")
-        holder.bind(book)
-    }
-
-    override fun submitList(list: List<Book>?) {
-        Log.d("BooksAdapter", "submitList() called")
-        Log.d("BooksAdapter", "List size: ${list?.size ?: 0}")
-
-        if (list != null && list.isNotEmpty()) {
-            Log.d("BooksAdapter", "First 3 books:")
-            list.take(3).forEachIndexed { index, book ->
-                Log.d("BooksAdapter", "  $index: ${book.title} (ID: ${book.id})")
-            }
-        }
-
-        super.submitList(list)
+        holder.bind(getItem(position))
     }
 
     inner class BookViewHolder(
@@ -52,51 +34,78 @@ class BooksAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         init {
-            Log.d("BooksAdapter", "BookViewHolder init()")
             binding.root.setOnClickListener {
-                val book = getItem(adapterPosition)
-                Log.d("BooksAdapter", "Book clicked: ${book.title} (ID: ${book.id})")
-                onItemClick(book)
+                onItemClick(getItem(adapterPosition))
             }
-
             binding.detailsButton.visibility = View.GONE
         }
 
-        fun bind(book: Book) {
-            Log.d("BooksAdapter", "bind() book: ${book.title}")
+        fun bind(bookWithDetails: BookWithDetails) {
+            Log.d("BooksAdapter", "=== BINDING BOOK ===")
+            Log.d("BooksAdapter", "Title: ${bookWithDetails.book.title}")
+            Log.d("BooksAdapter", "Book ID: ${bookWithDetails.book.id}")
 
+            // Авторы
+            Log.d("BooksAdapter", "Authors list size: ${bookWithDetails.authors.size}")
+            bookWithDetails.authors.forEachIndexed { index, author ->
+                Log.d("BooksAdapter",
+                    "  Author[$index]: " +
+                            "id=${author.id}, " +
+                            "authorSurname='${author.surname}', " +
+                            "authorName='${author.name}', " +
+                            "authorPatronymic='${author.patronymic}'"
+                )
+            }
+            Log.d("BooksAdapter", "authorsFormatted: '${bookWithDetails.authorsFormatted}'")
+
+            // Жанры
+            Log.d("BooksAdapter", "Genres list size: ${bookWithDetails.genres.size}")
+            bookWithDetails.genres.forEachIndexed { index, genre ->
+                Log.d("BooksAdapter", "  Genre[$index]: id=${genre.id}, name='${genre.name}'")
+            }
+            Log.d("BooksAdapter", "genresFormatted: '${bookWithDetails.genresFormatted}'")
+
+            // Проверим Book поля
+            Log.d("BooksAdapter", "Book.cover: '${bookWithDetails.book.cover}'")
+            Log.d("BooksAdapter", "Book.quantityRemaining: ${bookWithDetails.book.quantityRemaining}")
             binding.apply {
-                bookTitle.text = book.title
-                bookAuthor.text = book.authorsMark
+                bookTitle.text = bookWithDetails.book.title
 
-                bookGenre.visibility = View.GONE
-                bookYear.visibility = View.GONE
-                bookVolume.visibility = View.GONE
-                bookIndex.visibility = View.GONE
-                bookPlace.visibility = View.GONE
+                // Авторы
+                bookAuthor.text = bookWithDetails.authorsFormatted.ifEmpty { "Автор не указан" }
 
-                val isAvailable = book.quantityRemaining > 0
-                bookStatus.text = if (isAvailable) {
+                // Жанры
+                bookGenre.text = bookWithDetails.genresFormatted.ifEmpty { "Жанр не указан" }
+                bookGenre.visibility = View.VISIBLE
+
+                // Статус
+                bookStatus.text = if (bookWithDetails.book.quantityRemaining > 0) {
                     "✅ В наличии"
                 } else {
                     "❌ Нет в наличии"
                 }
 
-                Log.d("BooksAdapter", "Loading cover: ${book.cover}")
+                // Обложка
                 bookCover.loadImage(
-                    book.cover,
+                    bookWithDetails.book.cover,
                     placeholder = R.drawable.ic_book_placeholder
                 )
+
+                // Скрытые поля
+                bookYear.visibility = View.GONE
+                bookVolume.visibility = View.GONE
+                bookIndex.visibility = View.GONE
+                bookPlace.visibility = View.GONE
             }
         }
     }
 
-    class BookDiffCallback : DiffUtil.ItemCallback<Book>() {
-        override fun areItemsTheSame(oldItem: Book, newItem: Book): Boolean {
-            return oldItem.id == newItem.id
+    class BookWithDetailsDiffCallback : DiffUtil.ItemCallback<BookWithDetails>() {
+        override fun areItemsTheSame(oldItem: BookWithDetails, newItem: BookWithDetails): Boolean {
+            return oldItem.book.id == newItem.book.id
         }
 
-        override fun areContentsTheSame(oldItem: Book, newItem: Book): Boolean {
+        override fun areContentsTheSame(oldItem: BookWithDetails, newItem: BookWithDetails): Boolean {
             return oldItem == newItem
         }
     }

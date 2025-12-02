@@ -6,25 +6,23 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import ru.kafpin.data.LibraryDatabase
+import ru.kafpin.data.RepositoryProvider
 import ru.kafpin.repositories.BookRepository
-import ru.kafpin.repositories.SmartSyncService
-import ru.kafpin.utils.NetworkMonitor
 
 class BookViewModel(
-    private val repository: BookRepository,
-    private val networkMonitor: NetworkMonitor,
-    context: Context
+    private val bookRepository: BookRepository,
+    private val bookDetailsRepository: ru.kafpin.repositories.BookDetailsRepository,
+    private val networkMonitor: ru.kafpin.utils.NetworkMonitor
 ) : ViewModel() {
 
     private val TAG = "BookViewModel"
 
-    // ==================== STATE FLOWS ====================
+    private val _allBooks = MutableStateFlow<List<ru.kafpin.data.models.BookWithDetails>>(emptyList())
+    val allBooks: StateFlow<List<ru.kafpin.data.models.BookWithDetails>> = _allBooks.asStateFlow()
 
-    private val _allBooks = MutableStateFlow<List<ru.kafpin.api.models.Book>>(emptyList())
-    val allBooks: StateFlow<List<ru.kafpin.api.models.Book>> = _allBooks.asStateFlow()
-
-    private val _currentPageBooks = MutableStateFlow<List<ru.kafpin.api.models.Book>>(emptyList())
-    val currentPageBooks: StateFlow<List<ru.kafpin.api.models.Book>> = _currentPageBooks.asStateFlow()
+    private val _currentPageBooks = MutableStateFlow<List<ru.kafpin.data.models.BookWithDetails>>(emptyList())
+    val currentPageBooks: StateFlow<List<ru.kafpin.data.models.BookWithDetails>> = _currentPageBooks.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -35,14 +33,12 @@ class BookViewModel(
     private val _isOnline = MutableStateFlow(false)
     val isOnline: StateFlow<Boolean> = _isOnline.asStateFlow()
 
-    // Поиск
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    private val _searchResults = MutableStateFlow<List<ru.kafpin.api.models.Book>>(emptyList())
-    val searchResults: StateFlow<List<ru.kafpin.api.models.Book>> = _searchResults.asStateFlow()
+    private val _searchResults = MutableStateFlow<List<ru.kafpin.data.models.BookWithDetails>>(emptyList())
+    val searchResults: StateFlow<List<ru.kafpin.data.models.BookWithDetails>> = _searchResults.asStateFlow()
 
-    // Пагинация
     private val _paginationInfo = MutableStateFlow(PaginationInfo())
     val paginationInfo: StateFlow<PaginationInfo> = _paginationInfo.asStateFlow()
 
@@ -60,48 +56,41 @@ class BookViewModel(
         Log.d(TAG, "BookViewModel initialized")
 
         viewModelScope.launch {
-            Log.d(TAG, "🚀 Starting SmartSyncService from ViewModel")
-            val smartSync = SmartSyncService(context)
-            smartSync.syncIfNeeded()
-        }
+            try {
+                val books = bookDetailsRepository.getAllBooksWithDetails()
+                if (books.isEmpty() && networkMonitor.isOnline.value) {
+                    Log.d(TAG, "📱 No books found, performing initial sync...")
+                    val syncSuccess = bookRepository.syncBooks()
 
-        networkMonitor.start()
+                    if (syncSuccess) {
+                        val freshBooks = bookDetailsRepository.getAllBooksWithDetails()
+                        _allBooks.value = freshBooks
+                        showPage(0)
+                        Log.d(TAG, "✅ Initial sync successful, loaded ${freshBooks.size} books")
+                    } else {
+                        Log.w(TAG, "⚠️ Initial sync failed")
+                        _errorMessage.value = "Не удалось загрузить данные"
+                    }
+                } else {
+                    Log.d(TAG, "📚 Found ${books.size} books, no sync needed")
+                    _allBooks.value = books
+                    showPage(0)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Error during initial load", e)
+                _errorMessage.value = "Ошибка инициализации: ${e.message}"
+            }
+        }
 
         viewModelScope.launch {
             networkMonitor.isOnline.collect { online ->
                 _isOnline.value = online
                 Log.d(TAG, "Network status changed: ${if (online) "ONLINE" else "OFFLINE"}")
-
-                if (online && _allBooks.value.isNotEmpty()) {
-                    backgroundSync()
-                }
             }
         }
-
-        loadBooks()
     }
 
     // ==================== ОСНОВНЫЕ МЕТОДЫ ====================
-
-    fun loadBooks() {
-        if (_isLoading.value) return
-
-        _isLoading.value = true
-        _errorMessage.value = null
-
-        viewModelScope.launch {
-            try {
-                val books = repository.getBooks()
-                _allBooks.value = books
-                showPage(0)
-            } catch (e: Exception) {
-                Log.e(TAG, "loadBooks: Error", e)
-                _errorMessage.value = "Ошибка загрузки: ${e.message}"
-            } finally {
-                _isLoading.value = false
-            }
-        }
-    }
 
     fun clearErrorMessage() {
         _errorMessage.value = null
@@ -116,66 +105,34 @@ class BookViewModel(
         }
 
         _isLoading.value = true
-        _errorMessage.value = null  // Очищаем предыдущие ошибки
+        _errorMessage.value = null
 
         viewModelScope.launch {
             try {
                 if (_isOnline.value) {
-                    // Есть интернет - пробуем синхронизировать
                     Log.d(TAG, "🔄 Online refresh - syncing with server...")
-                    val success = repository.syncBooks()
+                    val success = bookRepository.syncBooks()
 
                     if (success) {
                         Log.d(TAG, "✅ Sync successful")
-                        val freshBooks = repository.getLocalBooks()
+                        val freshBooks = bookDetailsRepository.getAllBooksWithDetails()
                         _allBooks.value = freshBooks
                         showPage(_paginationInfo.value.currentPage)
-                        // Не устанавливаем ошибку при успехе
+                        Log.d(TAG, "✅ Updated books list with details (${freshBooks.size} books)")
                     } else {
-                        // Синхронизация не удалась
                         Log.w(TAG, "⚠️ Sync failed")
-                        val localBooks = repository.getLocalBooks()
-                        _allBooks.value = localBooks
-                        showPage(_paginationInfo.value.currentPage)
                         _errorMessage.value = "Не удалось обновиться"
                     }
                 } else {
-                    // Нет интернета - просто показываем локальные книги
-                    Log.d(TAG, "📴 Offline mode - showing local books")
-                    val localBooks = repository.getLocalBooks()
-                    _allBooks.value = localBooks
-                    showPage(_paginationInfo.value.currentPage)
+                    Log.d(TAG, "📴 Offline mode - reloading local books")
                     _errorMessage.value = "Офлайн режим - данные могут быть устаревшими"
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "❌ Refresh error", e)
-                // При любой ошибке показываем локальные книги
-                try {
-                    val localBooks = repository.getLocalBooks()
-                    _allBooks.value = localBooks
-                    showPage(_paginationInfo.value.currentPage)
-                } catch (dbError: Exception) {
-                    // Если даже локальные не загрузились
-                    _allBooks.value = emptyList()
-                    showPage(0)
-                }
-                _errorMessage.value = "Ошибка: ${e.message}"
+                _errorMessage.value = "Ошибка обновления: ${e.message}"
             } finally {
                 _isLoading.value = false
                 Log.d(TAG, "refresh completed, isLoading = false")
-            }
-        }
-    }
-
-    private fun backgroundSync() {
-        viewModelScope.launch {
-            try {
-                repository.syncBooks()
-                val books = repository.getLocalBooks()
-                _allBooks.value = books
-                showPage(_paginationInfo.value.currentPage)
-            } catch (e: Exception) {
-                // Фоновая ошибка - не показываем
             }
         }
     }
@@ -193,18 +150,19 @@ class BookViewModel(
 
         viewModelScope.launch {
             try {
-                val results = repository.searchBooks(query)
+                val results = bookDetailsRepository.searchBooksWithDetails(query)
                 _searchResults.value = results
 
-                // Показываем первую страницу результатов
                 if (results.isNotEmpty()) {
-                    showPage(0, results)
+                    showPage(0)
+                    Log.d(TAG, "🔍 Found ${results.size} books for query: '$query'")
                 } else {
                     _currentPageBooks.value = emptyList()
                     updatePaginationInfo(0, 0)
+                    Log.d(TAG, "🔍 No books found for query: '$query'")
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Search error", e)
+                Log.e(TAG, "🔍 Search error", e)
             }
         }
     }
@@ -213,7 +171,7 @@ class BookViewModel(
 
     private val pageSize = 10
 
-    private fun showPage(page: Int, booksList: List<ru.kafpin.api.models.Book>? = null) {
+    private fun showPage(page: Int) {
         val booksToShow = if (_searchQuery.value.isBlank()) {
             _allBooks.value
         } else {
@@ -269,6 +227,6 @@ class BookViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        networkMonitor.stop()
+        Log.d(TAG, "BookViewModel cleared")
     }
 }

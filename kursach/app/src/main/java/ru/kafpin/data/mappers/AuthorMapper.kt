@@ -15,9 +15,9 @@ fun Author.toAuthorEntity(): AuthorEntity {
 fun AuthorEntity.toAuthor(): Author {
     return Author(
         id = id,
-        authorSurname = surname ?: "",
-        authorName = name,
-        authorPatronymic = patronymic
+        authorSurname = surname,
+        authorName = name ?: "",
+        authorPatronymic = patronymic ?: ""
     )
 }
 

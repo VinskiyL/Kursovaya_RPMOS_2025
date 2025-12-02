@@ -1,4 +1,3 @@
-// Обнови файл: data/LibraryDatabase.kt
 package ru.kafpin.data
 
 import androidx.room.Database
@@ -24,7 +23,7 @@ import ru.kafpin.data.models.BookGenreCrossRef
         BookAuthorCrossRef::class,
         BookGenreCrossRef::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class LibraryDatabase : RoomDatabase() {

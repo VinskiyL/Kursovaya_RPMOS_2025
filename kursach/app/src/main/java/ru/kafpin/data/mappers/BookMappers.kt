@@ -17,7 +17,7 @@ fun Book.toBookEntity(): BookEntity {
         volume = volume,
         quantityTotal = quantityTotal,
         quantityRemaining = quantityRemaining,
-        cover = cover,
+        cover = cover  ?: "",
         datePublication = datePublication,
         lastSynced = System.currentTimeMillis() // текущее время как метка синхронизации
     )
@@ -37,7 +37,7 @@ fun BookEntity.toBook(): Book {
         volume = volume,
         quantityTotal = quantityTotal,
         quantityRemaining = quantityRemaining,
-        cover = cover,
+        cover = cover ?: "",
         datePublication = datePublication
     )
 }

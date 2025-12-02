@@ -10,5 +10,5 @@ data class AuthorEntity(
     val name: String?,
     val surname: String,
     val patronymic: String?,
-    val lastSynced: Long = System.currentTimeMillis() // для синхронизации
+    val lastSynced: Long = System.currentTimeMillis()
 )

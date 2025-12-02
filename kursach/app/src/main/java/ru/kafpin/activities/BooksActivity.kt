@@ -26,7 +26,7 @@ class BooksActivity : BaseActivity<ActivityBooksBinding>() {
         BookViewModelFactory(this)
     }
     private lateinit var adapter: BooksAdapter
-    private var wasOffline = false // Для отслеживания изменения статуса сети
+    private var wasOffline = false
 
     override fun inflateBinding(): ActivityBooksBinding {
         Log.d(TAG, "inflateBinding()")
@@ -35,11 +35,6 @@ class BooksActivity : BaseActivity<ActivityBooksBinding>() {
 
     override fun setupUI() {
         Log.d(TAG, "setupUI()")
-
-        // Проверяем binding
-        Log.d(TAG, "Binding null? ${binding == null}")
-        Log.d(TAG, "RecyclerView found? ${binding.booksRecyclerView != null}")
-        Log.d(TAG, "ProgressBar found? ${binding.progressBar != null}")
 
         setupRecyclerView()
         setupSwipeRefresh()
@@ -90,9 +85,10 @@ class BooksActivity : BaseActivity<ActivityBooksBinding>() {
 
     private fun setupRecyclerView() {
         Log.d(TAG, "setupRecyclerView()")
-        adapter = BooksAdapter { book ->
-            Log.d(TAG, "Book clicked: ${book.title}")
-            showBookDetails(book)
+        // 🔥 Исправляем тип лямбды - принимает BookWithDetails
+        adapter = BooksAdapter { bookWithDetails ->
+            Log.d(TAG, "Book clicked: ${bookWithDetails.book.title}")
+            showBookDetails(bookWithDetails)
         }
 
         binding.booksRecyclerView.apply {
@@ -122,7 +118,7 @@ class BooksActivity : BaseActivity<ActivityBooksBinding>() {
             }
         }
 
-        // Отслеживаем книги для отображения
+        // 🔥 Тип books теперь List<BookWithDetails>
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.currentPageBooks.collect { books ->
@@ -140,13 +136,12 @@ class BooksActivity : BaseActivity<ActivityBooksBinding>() {
             }
         }
 
-        // Отслеживаем статус сети - показываем в тулбаре + Toast при изменении
+        // Отслеживаем статус сети
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.isOnline.collect { isOnline ->
                     Log.d(TAG, "Network status changed: $isOnline")
 
-                    // Показываем Toast только при изменении статуса
                     if (wasOffline != !isOnline) {
                         val message = if (isOnline) "✅ Сеть восстановлена" else "🔴 Нет подключения"
                         showToast(message)
@@ -171,18 +166,16 @@ class BooksActivity : BaseActivity<ActivityBooksBinding>() {
             }
         }
 
-        // Отслеживаем ошибки - показываем только как Toast
+        // Отслеживаем ошибки
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.errorMessage.collect { errorMessage ->
                     errorMessage?.let { message ->
                         Log.e(TAG, "Error received: $message")
 
-                        // Все ошибки показываем как Toast
                         showToast(message)
                         stopSwipeRefresh()
 
-                        // Сбрасываем ошибку после показа
                         viewModel.clearErrorMessage()
                     }
                 }
@@ -243,9 +236,9 @@ class BooksActivity : BaseActivity<ActivityBooksBinding>() {
     private fun showLoadingState() {
         Log.d(TAG, "showLoadingState()")
         binding.progressBar.visibility = View.VISIBLE
-        binding.booksRecyclerView.visibility = View.GONE  // Скрываем ТОЛЬКО RecyclerView
+        binding.booksRecyclerView.visibility = View.GONE
         binding.errorLayout.visibility = View.GONE
-        binding.swipeRefreshLayout.isEnabled = false  // Будет виден, но неактивен
+        binding.swipeRefreshLayout.isEnabled = false
         binding.pageIndicator.text = "Загрузка..."
 
         binding.prevPageButton.isEnabled = false
@@ -255,9 +248,9 @@ class BooksActivity : BaseActivity<ActivityBooksBinding>() {
     private fun showContentState() {
         Log.d(TAG, "showContentState()")
         binding.progressBar.visibility = View.GONE
-        binding.booksRecyclerView.visibility = View.VISIBLE  // Показываем RecyclerView
+        binding.booksRecyclerView.visibility = View.VISIBLE
         binding.errorLayout.visibility = View.GONE
-        binding.swipeRefreshLayout.isEnabled = true  // Активируем
+        binding.swipeRefreshLayout.isEnabled = true
 
         val pagination = viewModel.paginationInfo.value
         binding.prevPageButton.isEnabled = pagination.hasPreviousPage
@@ -292,8 +285,10 @@ class BooksActivity : BaseActivity<ActivityBooksBinding>() {
         }
     }
 
-    private fun showBookDetails(book: ru.kafpin.api.models.Book) {
-        Log.d(TAG, "showBookDetails() for book ID: ${book.id}, title: ${book.title}")
-        BookDetailsActivity.start(this, book.id)
+    // 🔥 Исправляем метод - принимает BookWithDetails
+    private fun showBookDetails(bookWithDetails: ru.kafpin.data.models.BookWithDetails) {
+        Log.d(TAG, "showBookDetails() for book ID: ${bookWithDetails.book.id}, title: ${bookWithDetails.book.title}")
+        // Передаём ID книги (book.id, а не bookWithDetails.book.id - это одно и то же)
+        BookDetailsActivity.start(this, bookWithDetails.book.id)
     }
 }

@@ -5,9 +5,6 @@ import ru.kafpin.data.models.BookGenreCrossRef
 
 @Dao
 interface BookGenreDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertBookGenreRelations(relations: List<BookGenreCrossRef>)
-
     @Query("SELECT * FROM bookgenrecrossref WHERE bookId = :bookId")
     suspend fun getGenresForBook(bookId: Long): List<BookGenreCrossRef>
 
@@ -20,9 +17,15 @@ interface BookGenreDao {
     @Query("DELETE FROM bookgenrecrossref")
     suspend fun clearAllRelations()
 
+    @Query("SELECT bookId FROM bookgenrecrossref WHERE genreId = :genreId")
+    suspend fun getBookIdsForGenre(genreId: Long): List<Long>
+
     @Query("SELECT genreId FROM bookgenrecrossref WHERE bookId = :bookId")
     suspend fun getGenreIdsForBook(bookId: Long): List<Long>
 
-    @Query("SELECT bookId FROM bookgenrecrossref WHERE genreId = :genreId")
-    suspend fun getBookIdsForGenre(genreId: Long): List<Long>
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertBookGenreRelations(relations: List<BookGenreCrossRef>)
+
+    @Query("SELECT * FROM bookgenrecrossref WHERE bookId IN (:bookIds)")
+    suspend fun getGenreRelationsForBooks(bookIds: List<Long>): List<BookGenreCrossRef>
 }

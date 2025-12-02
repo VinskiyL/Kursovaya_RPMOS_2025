@@ -16,5 +16,6 @@ data class Author(
     val authorName: String?,
 
     @SerializedName("authorPatronymic")
-    val authorPatronymic: String?
+    val authorPatronymic: String?,
+
 ) : Parcelable
