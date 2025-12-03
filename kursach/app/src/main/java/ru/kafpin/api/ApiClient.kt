@@ -24,7 +24,6 @@ object ApiClient {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-    // Объединенный сервис для всех API вызовов
     val apiService: ApiService by lazy {
         retrofit.create(ApiService::class.java)
     }

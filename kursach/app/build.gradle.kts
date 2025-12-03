@@ -86,4 +86,6 @@ dependencies {
     implementation(libs.androidx.swiperefreshlayout)
 
     implementation(libs.glide)
+
+    implementation(libs.androidx.work.runtime.ktx.v2110)
 }

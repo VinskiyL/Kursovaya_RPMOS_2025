@@ -155,7 +155,6 @@ class BookDetailsActivity : BaseActivity<ActivityBookDetailsBinding>() {
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(bookCover)
 
-            // Показываем ВСЕ поля (убрали скрытие)
             bookYear.isVisible = true
             bookVolume.isVisible = true
             bookIndex.isVisible = true

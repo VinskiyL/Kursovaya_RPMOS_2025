@@ -3,9 +3,6 @@ package ru.kafpin.data.mappers
 import ru.kafpin.api.models.Book
 import ru.kafpin.data.models.BookEntity
 
-/**
- * Конвертируем Book (API модель) в BookEntity (БД модель)
- */
 fun Book.toBookEntity(): BookEntity {
     return BookEntity(
         id = id,
@@ -19,13 +16,9 @@ fun Book.toBookEntity(): BookEntity {
         quantityRemaining = quantityRemaining,
         cover = cover  ?: "",
         datePublication = datePublication,
-        lastSynced = System.currentTimeMillis() // текущее время как метка синхронизации
+        lastSynced = System.currentTimeMillis()
     )
 }
-
-/**
- * Конвертируем BookEntity (БД модель) в Book (API модель)
- */
 fun BookEntity.toBook(): Book {
     return Book(
         id = id,
@@ -42,9 +35,6 @@ fun BookEntity.toBook(): Book {
     )
 }
 
-/**
- * Конвертируем списки
- */
 fun List<Book>.toBookEntities(): List<BookEntity> {
     return map { it.toBookEntity() }
 }

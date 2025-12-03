@@ -4,15 +4,11 @@ import android.content.Context
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-/**
- * Умный мониторинг для точки доступа - проверяет доступность порта сервера
- */
 class NetworkMonitor(context: Context) {
 
     private val _isOnline = MutableStateFlow(false)
     val isOnline: StateFlow<Boolean> = _isOnline
 
-    // IP и порт твоего сервера
     private val serverIp = "192.168.43.210"
     private val serverPort = 8080
 
@@ -32,7 +28,7 @@ class NetworkMonitor(context: Context) {
         // Запускаем фоновую проверку каждые 10 секунд
         Thread {
             while (isChecking) {
-                Thread.sleep(10000) // Ждём 10 секунд
+                Thread.sleep(10000)
                 if (isChecking) {
                     checkServerAvailability()
                 }

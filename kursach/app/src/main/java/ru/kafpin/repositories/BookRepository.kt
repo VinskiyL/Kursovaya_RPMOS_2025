@@ -2,6 +2,7 @@ package ru.kafpin.repositories
 
 import android.content.Context
 import android.util.Log
+import androidx.room.withTransaction
 import ru.kafpin.api.ApiClient
 import ru.kafpin.api.models.*
 import ru.kafpin.data.LibraryDatabase
@@ -195,57 +196,121 @@ class BookRepository(context: Context) {
         }    }
 
     private suspend fun saveBooksToLocal(books: List<Book>) {
-        Log.d(TAG, "💾 saveBooksToLocal() called with ${books.size} books")
         try {
-            database.bookDao().insertBooks(books.map { it.toBookEntity() })
-            Log.d(TAG, "✅ Successfully saved ${books.size} books to DB")
+            database.withTransaction {
+                Log.d(TAG, "💾 Сохранение книг в локальную БД: ${books.size} шт")
+
+                val serverIds = books.map { it.id }
+                val localIds = database.bookDao().getAllBookIds()
+                val idsToDelete = localIds.filter { it !in serverIds }
+
+                if (idsToDelete.isNotEmpty()) {
+                    Log.d(TAG, "🗑️ Удаление книг: $idsToDelete")
+                    database.bookDao().deleteBooksByIds(idsToDelete)
+                }
+
+                val entities = books.map { it.toBookEntity() }
+                database.bookDao().insertBooks(entities)
+                Log.d(TAG, "✅ Сохранено ${entities.size} книг")
+            }
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Error saving books to local DB", e)
+            Log.e(TAG, "❌ Ошибка сохранения книг в локальную БД", e)
             throw e
         }
     }
 
     private suspend fun saveAuthorsToLocal(authors: List<Author>) {
-        Log.d(TAG, "💾 saveAuthorsToLocal() called with ${authors.size} authors")
-
         try {
-            database.authorDao().insertAuthors(authors.map { it.toAuthorEntity() })
-            Log.d(TAG, "✅ Successfully saved ${authors.size} authors to DB")
+            database.withTransaction {
+                Log.d(TAG, "💾 Сохранение авторов в локальную БД: ${authors.size} шт")
+
+                val serverIds = authors.map { it.id }
+                val localIds = database.authorDao().getAllAuthorIds()
+                val idsToDelete = localIds.filter { it !in serverIds }
+
+                if (idsToDelete.isNotEmpty()) {
+                    Log.d(TAG, "🗑️ Удаление авторов: $idsToDelete")
+                    database.authorDao().deleteAuthorsByIds(idsToDelete)
+                }
+
+                val entities = authors.map { it.toAuthorEntity() }
+                database.authorDao().insertAuthors(entities)
+                Log.d(TAG, "✅ Сохранено ${entities.size} авторов")
+            }
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Error saving authors to local DB", e)
+            Log.e(TAG, "❌ Ошибка сохранения авторов в локальную БД", e)
             throw e
         }
     }
 
     private suspend fun saveGenresToLocal(genres: List<Genre>) {
-        Log.d(TAG, "💾 saveGenresToLocal() called with ${genres.size} genres")
         try {
-            database.genreDao().insertGenres(genres.map { it.toGenreEntity() })
-            Log.d(TAG, "✅ Successfully saved ${genres.size} genres to DB")
+            database.withTransaction {
+                Log.d(TAG, "💾 Сохранение жанров в локальную БД: ${genres.size} шт")
+
+                val serverIds = genres.map { it.id }
+                val localIds = database.genreDao().getAllGenreIds()
+                val idsToDelete = localIds.filter { it !in serverIds }
+
+                if (idsToDelete.isNotEmpty()) {
+                    Log.d(TAG, "🗑️ Удаление жанров: $idsToDelete")
+                    database.genreDao().deleteGenresByIds(idsToDelete)
+                }
+
+                val entities = genres.map { it.toGenreEntity() }
+                database.genreDao().insertGenres(entities)
+                Log.d(TAG, "✅ Сохранено ${entities.size} жанров")
+            }
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Error saving genres to local DB", e)
+            Log.e(TAG, "❌ Ошибка сохранения жанров в локальную БД", e)
             throw e
         }
     }
 
     private suspend fun saveAuthorBooksToLocal(relations: List<AuthorBook>) {
-        Log.d(TAG, "💾 saveAuthorBooksToLocal() called with ${relations.size} relations")
         try {
-            database.bookAuthorDao().insertBookAuthorRelations(relations.map { it.toBookAuthorCrossRef() })
-            Log.d(TAG, "✅ Successfully saved ${relations.size} author-book relations to DB")
+            database.withTransaction {
+                Log.d(TAG, "💾 Сохранение связей автор-книга: ${relations.size} шт")
+
+                val serverIds = relations.map { it.id }
+                val localIds = database.bookAuthorDao().getAllRelationIds()
+                val idsToDelete = localIds.filter { it !in serverIds }
+
+                if (idsToDelete.isNotEmpty()) {
+                    Log.d(TAG, "🗑️ Удаление связей автор-книга: ${idsToDelete.size} шт")
+                    database.bookAuthorDao().deleteRelationsByIds(idsToDelete)
+                }
+
+                val entities = relations.map { it.toBookAuthorCrossRef() }
+                database.bookAuthorDao().insertBookAuthorRelations(entities)
+                Log.d(TAG, "✅ Сохранено ${entities.size} связей автор-книга")
+            }
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Error saving author-book relations to local DB", e)
+            Log.e(TAG, "❌ Ошибка сохранения связей автор-книга в локальную БД", e)
             throw e
         }
     }
 
     private suspend fun saveBookGenresToLocal(relations: List<BookGenre>) {
-        Log.d(TAG, "💾 saveBookGenresToLocal() called with ${relations.size} relations")
         try {
-            database.bookGenreDao().insertBookGenreRelations(relations.map { it.toBookGenreCrossRef() })
-            Log.d(TAG, "✅ Successfully saved ${relations.size} book-genre relations to DB")
+            database.withTransaction {
+                Log.d(TAG, "💾 Сохранение связей книга-жанр: ${relations.size} шт")
+
+                val serverIds = relations.map { it.id }
+                val localIds = database.bookGenreDao().getAllRelationIds()
+                val idsToDelete = localIds.filter { it !in serverIds }
+
+                if (idsToDelete.isNotEmpty()) {
+                    Log.d(TAG, "🗑️ Удаление связей книга-жанр: ${idsToDelete.size} шт")
+                    database.bookGenreDao().deleteRelationsByIds(idsToDelete)
+                }
+
+                val entities = relations.map { it.toBookGenreCrossRef() }
+                database.bookGenreDao().insertBookGenreRelations(entities)
+                Log.d(TAG, "✅ Сохранено ${entities.size} связей книга-жанр")
+            }
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Error saving book-genre relations to local DB", e)
+            Log.e(TAG, "❌ Ошибка сохранения связей книга-жанр в локальную БД", e)
             throw e
         }
     }

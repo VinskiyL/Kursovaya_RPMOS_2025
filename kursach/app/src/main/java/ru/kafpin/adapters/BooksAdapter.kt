@@ -67,7 +67,6 @@ class BooksAdapter(
             }
             Log.d("BooksAdapter", "genresFormatted: '${bookWithDetails.genresFormatted}'")
 
-            // Проверим Book поля
             Log.d("BooksAdapter", "Book.cover: '${bookWithDetails.book.cover}'")
             Log.d("BooksAdapter", "Book.quantityRemaining: ${bookWithDetails.book.quantityRemaining}")
             binding.apply {
@@ -97,7 +96,6 @@ class BooksAdapter(
                     .diskCacheStrategy(DiskCacheStrategy.ALL) // Ключевая настройка: кэшируем ВСЁ
                     .into(binding.bookCover) // Загружаем в ImageView
 
-                // Скрытые поля
                 bookYear.visibility = View.GONE
                 bookVolume.visibility = View.GONE
                 bookIndex.visibility = View.GONE

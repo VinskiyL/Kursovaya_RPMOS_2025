@@ -6,7 +6,6 @@ import ru.kafpin.data.models.BookEntity
 @Dao
 interface BookDao {
 
-    // Базовые операции CRUD
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBooks(books: List<BookEntity>)
 
@@ -46,4 +45,10 @@ interface BookDao {
     WHERE LOWER(g.name) LIKE '%' || LOWER(:query) || '%'
     """)
     suspend fun searchBooksByGenre(query: String): List<BookEntity>
+
+    @Query("SELECT id FROM books")
+    suspend fun getAllBookIds(): List<Long>
+
+    @Query("DELETE FROM books WHERE id IN (:ids)")
+    suspend fun deleteBooksByIds(ids: List<Long>)
 }

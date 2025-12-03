@@ -1,13 +1,10 @@
 package ru.kafpin.viewmodels
 
-import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import ru.kafpin.data.LibraryDatabase
-import ru.kafpin.data.RepositoryProvider
 import ru.kafpin.repositories.BookRepository
 
 class BookViewModel(

@@ -1,10 +1,8 @@
 package ru.kafpin.activities
 
-import android.content.Intent
 import android.util.Log
 import android.view.View
 import android.view.Menu
-import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
@@ -17,7 +15,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.launch
 import ru.kafpin.R
 import ru.kafpin.viewmodels.BookViewModelFactory
-import androidx.core.view.isGone
 
 class BooksActivity : BaseActivity<ActivityBooksBinding>() {
     private val TAG = "BooksActivity"
@@ -85,7 +82,6 @@ class BooksActivity : BaseActivity<ActivityBooksBinding>() {
 
     private fun setupRecyclerView() {
         Log.d(TAG, "setupRecyclerView()")
-        // 🔥 Исправляем тип лямбды - принимает BookWithDetails
         adapter = BooksAdapter { bookWithDetails ->
             Log.d(TAG, "Book clicked: ${bookWithDetails.book.title}")
             showBookDetails(bookWithDetails)
@@ -118,7 +114,6 @@ class BooksActivity : BaseActivity<ActivityBooksBinding>() {
             }
         }
 
-        // 🔥 Тип books теперь List<BookWithDetails>
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.currentPageBooks.collect { books ->
@@ -285,7 +280,6 @@ class BooksActivity : BaseActivity<ActivityBooksBinding>() {
         }
     }
 
-    // 🔥 Исправляем метод - принимает BookWithDetails
     private fun showBookDetails(bookWithDetails: ru.kafpin.data.models.BookWithDetails) {
         Log.d(TAG, "showBookDetails() for book ID: ${bookWithDetails.book.id}, title: ${bookWithDetails.book.title}")
         BookDetailsActivity.start(this, bookWithDetails.book.id)

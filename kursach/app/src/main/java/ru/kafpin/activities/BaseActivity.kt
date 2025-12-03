@@ -28,7 +28,7 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
         setupFullScreen()
 
         // Устанавливаем базовый layout с тулбаром
-        setContentView(R.layout.activity_base)  // ← ВОТ ЭТО НУЖНО!
+        setContentView(R.layout.activity_base)
 
         // Инициализация тулбара
         setupToolbar()
@@ -36,7 +36,7 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
         // Инициализация ViewBinding наследника
         binding = inflateBinding()
         val contentContainer = findViewById<android.widget.FrameLayout>(R.id.content_container)
-        contentContainer.addView(binding.root)  // ← И ЭТО НУЖНО!
+        contentContainer.addView(binding.root)
 
         // Настройка контента
         setupUI()
@@ -59,7 +59,7 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
     }
 
     private fun setupToolbar() {
-        toolbar = findViewById(R.id.toolbar)  // ← И ЭТО НУЖНО!
+        toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
     }
 

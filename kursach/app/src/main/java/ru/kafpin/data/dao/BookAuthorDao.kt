@@ -28,4 +28,13 @@ interface BookAuthorDao {
 
     @Query("SELECT * FROM bookauthorcrossref WHERE bookId IN (:bookIds)")
     suspend fun getAuthorRelationsForBooks(bookIds: List<Long>): List<BookAuthorCrossRef>
+
+    @Query("UPDATE bookauthorcrossref SET lastSynced = :timestamp WHERE id = :relationId")
+    suspend fun updateRelationLastSynced(relationId: Long, timestamp: Long = System.currentTimeMillis())
+
+    @Query("SELECT id FROM bookauthorcrossref")
+    suspend fun getAllRelationIds(): List<Long>
+
+    @Query("DELETE FROM bookauthorcrossref WHERE id IN (:ids)")
+    suspend fun deleteRelationsByIds(ids: List<Long>)
 }

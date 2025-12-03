@@ -2,7 +2,6 @@ package ru.kafpin.repositories
 
 import android.util.Log
 import ru.kafpin.data.dao.*
-import ru.kafpin.data.mappers.*
 import ru.kafpin.data.models.BookWithDetails
 
 class BookDetailsRepository(

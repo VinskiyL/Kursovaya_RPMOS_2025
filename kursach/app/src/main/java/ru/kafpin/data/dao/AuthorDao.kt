@@ -23,4 +23,10 @@ interface AuthorDao {
 
     @Query("SELECT * FROM authors WHERE id IN (:authorIds)")
     suspend fun getAuthorsByIds(authorIds: List<Long>): List<AuthorEntity>
+
+    @Query("SELECT id FROM authors")
+    suspend fun getAllAuthorIds(): List<Long>
+
+    @Query("DELETE FROM authors WHERE id IN (:ids)")
+    suspend fun deleteAuthorsByIds(ids: List<Long>)
 }
