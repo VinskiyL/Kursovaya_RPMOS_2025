@@ -288,7 +288,6 @@ class BooksActivity : BaseActivity<ActivityBooksBinding>() {
     // 🔥 Исправляем метод - принимает BookWithDetails
     private fun showBookDetails(bookWithDetails: ru.kafpin.data.models.BookWithDetails) {
         Log.d(TAG, "showBookDetails() for book ID: ${bookWithDetails.book.id}, title: ${bookWithDetails.book.title}")
-        // Передаём ID книги (book.id, а не bookWithDetails.book.id - это одно и то же)
         BookDetailsActivity.start(this, bookWithDetails.book.id)
     }
 }

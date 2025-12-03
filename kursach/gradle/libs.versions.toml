@@ -1,29 +1,26 @@
 [versions]
 agp = "8.13.1"
+glide = "5.0.5"
 kotlin = "2.2.21"
 
 # AndroidX
 core-ktx = "1.17.0"
 appcompat = "1.7.1"
 material = "1.13.0"
-activity = "1.11.0"
+activity = "1.12.0"
 constraintlayout = "2.2.1"
-lifecycle = "2.9.4"
+lifecycle = "2.10.0"
 recyclerview = "1.4.0"
-room-ktx = "2.8.3"
-room-runtime = "2.8.3"
+room-ktx = "2.8.4"
+room-runtime = "2.8.4"
 swiperefreshlayout = "1.1.0"
 cardview = "1.0.0"
 viewbinding = "8.13.1"
-room = "2.8.3"
-work = "2.11.0"
+room = "2.8.4"
 
 # Networking
 retrofit = "3.0.0"
 okhttp = "5.3.0"
-
-# Image Loading
-coil = "2.7.0"
 
 # Testing
 junit = "4.13.2"
@@ -40,6 +37,7 @@ androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref =
 androidx-room-ktx-v283 = { module = "androidx.room:room-ktx", version.ref = "room-ktx" }
 androidx-room-runtime-v283 = { module = "androidx.room:room-runtime", version.ref = "room-runtime" }
 androidx-work-runtime-ktx-v2110 = { module = "androidx.work:work-runtime-ktx", version.ref = "work-runtime-ktx" }
+glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
 androidx-activity = { module = "androidx.activity:activity-ktx", version.ref = "activity" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
@@ -60,16 +58,6 @@ androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version
 androidx-swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version.ref = "swiperefreshlayout" }
 androidx-cardview = { module = "androidx.cardview:cardview", version.ref = "cardview" }
 
-# Database
-androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
-androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
-
-# Background Work
-androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
-
-# Image Loading
-coil = { module = "io.coil-kt:coil", version.ref = "coil" }
-
 # Testing
 junit = { module = "junit:junit", version.ref = "junit" }
 androidx-junit = { module = "androidx.test.ext:junit", version.ref = "junit-android" }
@@ -79,4 +67,3 @@ activity = { group = "androidx.activity", name = "activity", version.ref = "acti
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }

@@ -18,8 +18,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        buildConfigField("String", "BASE_URL", "\"https://your-spring-server:8080/api/\"")
     }
 
     buildFeatures {
@@ -70,9 +68,6 @@ dependencies {
     implementation(libs.androidx.swiperefreshlayout)
     implementation(libs.androidx.cardview)
 
-    // Image Loading
-    implementation(libs.coil)
-
     // Room Database (SQLite)
     implementation(libs.androidx.room.runtime.v283)
     implementation(libs.androidx.room.ktx.v283)
@@ -89,4 +84,6 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     implementation(libs.androidx.swiperefreshlayout)
+
+    implementation(libs.glide)
 }

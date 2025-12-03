@@ -7,10 +7,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import ru.kafpin.R
 import ru.kafpin.data.models.BookWithDetails
 import ru.kafpin.databinding.ItemBookBinding
-import ru.kafpin.utils.loadImage
+import ru.kafpin.utils.Constants.COVER_URL
 
 class BooksAdapter(
     private val onItemClick: (BookWithDetails) -> Unit
@@ -85,11 +87,15 @@ class BooksAdapter(
                     "❌ Нет в наличии"
                 }
 
-                // Обложка
-                bookCover.loadImage(
-                    bookWithDetails.book.cover,
-                    placeholder = R.drawable.ic_book_placeholder
-                )
+                val fullImageUrl = COVER_URL + bookWithDetails.book.cover
+
+                // Блок загрузки изображения через Glide
+                Glide.with(binding.root.context) // Контекст из View
+                    .load(fullImageUrl)
+                    .placeholder(R.drawable.ic_book_placeholder) // Плейсхолдер на время загрузки
+                    .error(R.drawable.ic_book_placeholder) // Запасная картинка при ошибке
+                    .diskCacheStrategy(DiskCacheStrategy.ALL) // Ключевая настройка: кэшируем ВСЁ
+                    .into(binding.bookCover) // Загружаем в ImageView
 
                 // Скрытые поля
                 bookYear.visibility = View.GONE

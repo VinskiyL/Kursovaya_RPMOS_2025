@@ -23,7 +23,7 @@ import ru.kafpin.data.models.BookGenreCrossRef
         BookAuthorCrossRef::class,
         BookGenreCrossRef::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class LibraryDatabase : RoomDatabase() {

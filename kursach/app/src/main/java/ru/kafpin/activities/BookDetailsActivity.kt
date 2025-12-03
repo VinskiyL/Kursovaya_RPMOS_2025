@@ -7,10 +7,12 @@ import androidx.activity.viewModels
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import kotlinx.coroutines.launch
 import ru.kafpin.R
 import ru.kafpin.databinding.ActivityBookDetailsBinding
-import ru.kafpin.utils.loadImage
+import ru.kafpin.utils.Constants.COVER_URL
 import ru.kafpin.viewmodels.BookDetailsViewModel
 import ru.kafpin.viewmodels.BookDetailsViewModelFactory
 
@@ -55,28 +57,43 @@ class BookDetailsActivity : BaseActivity<ActivityBookDetailsBinding>() {
     }
 
     private fun setupObservers() {
+        // Наблюдаем за состоянием загрузки
         lifecycleScope.launch {
             repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
                 viewModel.isLoading.collect { isLoading ->
                     binding.progressBar.isVisible = isLoading
-                    binding.contentScrollView.visibility = View.VISIBLE
-                    binding.errorLayout.visibility = View.VISIBLE
+                    // При загрузке скрываем контент и ошибку
+                    if (isLoading) {
+                        binding.contentScrollView.visibility = View.GONE
+                        binding.errorLayout.visibility = View.GONE
+                    }
                 }
             }
         }
 
+        // Наблюдаем за данными книги
         lifecycleScope.launch {
             repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
                 viewModel.bookDetails.collect { details ->
-                    details?.let { bindBookDetails(it) }
+                    details?.let {
+                        bindBookDetails(it)
+                        // Показываем контент, скрываем ошибку
+                        binding.contentScrollView.visibility = View.VISIBLE
+                        binding.errorLayout.visibility = View.GONE
+                    }
                 }
             }
         }
 
+        // Наблюдаем за ошибками
         lifecycleScope.launch {
             repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
                 viewModel.errorMessage.collect { error ->
-                    error?.let { showErrorState(it) }
+                    error?.let {
+                        showErrorState(it)
+                        // При ошибке показываем только её, скрываем контент
+                        binding.contentScrollView.visibility = View.GONE
+                    }
                 }
             }
         }
@@ -130,15 +147,19 @@ class BookDetailsActivity : BaseActivity<ActivityBookDetailsBinding>() {
             }
 
             // Обложка
-            bookCover.loadImage(
-                details.book.cover,
-                placeholder = R.drawable.ic_book_placeholder
-            )
+            val fullImageUrl = COVER_URL + details.book.cover
+            Glide.with(this@BookDetailsActivity)
+                .load(fullImageUrl)
+                .placeholder(R.drawable.ic_book_placeholder)
+                .error(R.drawable.ic_book_placeholder)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .into(bookCover)
 
-            // Показать контент
-            contentScrollView.visibility = View.VISIBLE
-            progressBar.visibility = View.GONE
-            errorLayout.visibility = View.GONE
+            // Показываем ВСЕ поля (убрали скрытие)
+            bookYear.isVisible = true
+            bookVolume.isVisible = true
+            bookIndex.isVisible = true
+            bookPlace.isVisible = true
         }
     }
 

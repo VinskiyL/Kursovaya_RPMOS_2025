@@ -8,5 +8,6 @@ data class BookAuthorCrossRef(
     @PrimaryKey
     val id: Long,
     val bookId: Long,
-    val authorId: Long
+    val authorId: Long,
+    val lastSynced: Long = System.currentTimeMillis()
 )

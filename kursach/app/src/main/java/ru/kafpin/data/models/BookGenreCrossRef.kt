@@ -8,5 +8,6 @@ data class BookGenreCrossRef(
     @PrimaryKey
     val id: Long,
     val bookId: Long,
-    val genreId: Long
+    val genreId: Long,
+    val lastSynced: Long = System.currentTimeMillis()
 )
