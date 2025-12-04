@@ -181,14 +181,14 @@ class BooksActivity : BaseActivity<ActivityBooksBinding>() {
     private fun updateToolbarWithNetworkStatus(isOnline: Boolean) {
         Log.d(TAG, "updateToolbarWithNetworkStatus: $isOnline")
         val networkStatus = if (isOnline) "✅ Онлайн" else "🔴 Офлайн"
-        val bookCount = viewModel.allBooks.value.size
+        val bookCount = viewModel.allBooksWithDetails.value.size
         val title = "Библиотека ($bookCount книг) $networkStatus"
         Log.d(TAG, "Setting toolbar title: '$title'")
         setToolbarTitle(title)
     }
 
     private fun updateToolbarWithBookCount() {
-        val bookCount = viewModel.allBooks.value.size
+        val bookCount = viewModel.allBooksWithDetails.value.size
         Log.d(TAG, "updateToolbarWithBookCount: $bookCount books")
         val currentTitle = supportActionBar?.title?.toString() ?: ""
 

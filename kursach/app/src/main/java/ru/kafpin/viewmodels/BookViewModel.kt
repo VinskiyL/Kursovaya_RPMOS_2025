@@ -3,8 +3,11 @@ package ru.kafpin.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ru.kafpin.repositories.BookRepository
 
 class BookViewModel(
@@ -15,13 +18,23 @@ class BookViewModel(
 
     private val TAG = "BookViewModel"
 
-    private val _allBooks = MutableStateFlow<List<ru.kafpin.data.models.BookWithDetails>>(emptyList())
-    val allBooks: StateFlow<List<ru.kafpin.data.models.BookWithDetails>> = _allBooks.asStateFlow()
+    // ==================== НОВЫЕ FLOW ====================
+
+    // Главный Flow для автообновления данных
+    val allBooksWithDetails: StateFlow<List<ru.kafpin.data.models.BookWithDetails>> =
+        bookDetailsRepository.getAllBooksWithDetailsFlow()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
+            )
+
+    // ==================== СУЩЕСТВУЮЩИЕ StateFlow ====================
 
     private val _currentPageBooks = MutableStateFlow<List<ru.kafpin.data.models.BookWithDetails>>(emptyList())
     val currentPageBooks: StateFlow<List<ru.kafpin.data.models.BookWithDetails>> = _currentPageBooks.asStateFlow()
 
-    private val _isLoading = MutableStateFlow(false)
+    private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     private val _errorMessage = MutableStateFlow<String?>(null)
@@ -31,7 +44,6 @@ class BookViewModel(
     val isOnline: StateFlow<Boolean> = _isOnline.asStateFlow()
 
     private val _searchQuery = MutableStateFlow("")
-    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
     private val _searchResults = MutableStateFlow<List<ru.kafpin.data.models.BookWithDetails>>(emptyList())
     val searchResults: StateFlow<List<ru.kafpin.data.models.BookWithDetails>> = _searchResults.asStateFlow()
@@ -52,37 +64,47 @@ class BookViewModel(
     init {
         Log.d(TAG, "BookViewModel initialized")
 
-        viewModelScope.launch {
-            try {
-                val books = bookDetailsRepository.getAllBooksWithDetails()
-                if (books.isEmpty() && networkMonitor.isOnline.value) {
-                    Log.d(TAG, "📱 No books found, performing initial sync...")
-                    val syncSuccess = bookRepository.syncBooks()
-
-                    if (syncSuccess) {
-                        val freshBooks = bookDetailsRepository.getAllBooksWithDetails()
-                        _allBooks.value = freshBooks
-                        showPage(0)
-                        Log.d(TAG, "✅ Initial sync successful, loaded ${freshBooks.size} books")
-                    } else {
-                        Log.w(TAG, "⚠️ Initial sync failed")
-                        _errorMessage.value = "Не удалось загрузить данные"
-                    }
-                } else {
-                    Log.d(TAG, "📚 Found ${books.size} books, no sync needed")
-                    _allBooks.value = books
-                    showPage(0)
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "❌ Error during initial load", e)
-                _errorMessage.value = "Ошибка инициализации: ${e.message}"
-            }
-        }
-
+        // 1. Подписываемся на сеть
         viewModelScope.launch {
             networkMonitor.isOnline.collect { online ->
                 _isOnline.value = online
                 Log.d(TAG, "Network status changed: ${if (online) "ONLINE" else "OFFLINE"}")
+            }
+        }
+
+        viewModelScope.launch {
+            allBooksWithDetails.collect { books ->
+                Log.d(TAG, "📚 Flow обновил данные: ${books.size} книг")
+
+                if (_currentPageBooks.value.isEmpty() && books.isNotEmpty()) {
+                    showPage(0)
+                }
+
+                if (_isLoading.value && books.isNotEmpty()) {
+                    _isLoading.value = false
+                }
+            }
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            delay(500) // Даём время Flow загрузить данные
+
+            val currentBooks = allBooksWithDetails.value
+            val isOnline = _isOnline.value
+
+            if (currentBooks.isEmpty() && isOnline) {
+                Log.d(TAG, "📱 БД пустая, делаем первоначальную синхронизацию...")
+                try {
+                    val syncSuccess = bookRepository.syncBooks()
+                    if (!syncSuccess) {
+                        Log.w(TAG, "⚠️ Initial sync failed")
+                        withContext(Dispatchers.Main) {
+                            _errorMessage.value = "Не удалось загрузить данные"
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "❌ Initial sync error", e)
+                }
             }
         }
     }
@@ -112,10 +134,6 @@ class BookViewModel(
 
                     if (success) {
                         Log.d(TAG, "✅ Sync successful")
-                        val freshBooks = bookDetailsRepository.getAllBooksWithDetails()
-                        _allBooks.value = freshBooks
-                        showPage(_paginationInfo.value.currentPage)
-                        Log.d(TAG, "✅ Updated books list with details (${freshBooks.size} books)")
                     } else {
                         Log.w(TAG, "⚠️ Sync failed")
                         _errorMessage.value = "Не удалось обновиться"
@@ -124,12 +142,14 @@ class BookViewModel(
                     Log.d(TAG, "📴 Offline mode - reloading local books")
                     _errorMessage.value = "Офлайн режим - данные могут быть устаревшими"
                 }
+            }catch (e: kotlinx.coroutines.CancellationException) {
+                Log.d(TAG, "Refresh cancelled")
             } catch (e: Exception) {
                 Log.e(TAG, "❌ Refresh error", e)
                 _errorMessage.value = "Ошибка обновления: ${e.message}"
             } finally {
                 _isLoading.value = false
-                Log.d(TAG, "refresh completed, isLoading = false")
+                Log.d(TAG, "refresh completed")
             }
         }
     }
@@ -170,7 +190,7 @@ class BookViewModel(
 
     private fun showPage(page: Int) {
         val booksToShow = if (_searchQuery.value.isBlank()) {
-            _allBooks.value
+            allBooksWithDetails.value
         } else {
             _searchResults.value
         }

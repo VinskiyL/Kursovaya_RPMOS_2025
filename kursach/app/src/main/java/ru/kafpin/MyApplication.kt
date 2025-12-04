@@ -2,6 +2,8 @@ package ru.kafpin
 
 import android.app.Application
 import android.content.ContentValues.TAG
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -26,8 +28,9 @@ class MyApplication : Application() {
         // Запускаем NetworkMonitor
         networkMonitor
 
-        // Настраиваем и запускаем WorkManager
-        setupWorkManager()
+        Handler(Looper.getMainLooper()).postDelayed({
+            setupWorkManager()
+        }, 1000)
     }
 
     private fun setupWorkManager() {

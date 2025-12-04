@@ -1,6 +1,7 @@
 package ru.kafpin.data.dao
 
 import androidx.room.*
+import kotlinx.coroutines.flow.Flow
 import ru.kafpin.data.models.AuthorEntity
 
 @Dao
@@ -29,4 +30,10 @@ interface AuthorDao {
 
     @Query("DELETE FROM authors WHERE id IN (:ids)")
     suspend fun deleteAuthorsByIds(ids: List<Long>)
+
+    @Query("SELECT * FROM authors")
+    fun getAllAuthorsFlow(): Flow<List<AuthorEntity>>
+
+    @Query("SELECT * FROM authors WHERE id IN (:authorIds)")
+    fun getAuthorsByIdsFlow(authorIds: List<Long>): Flow<List<AuthorEntity>>
 }

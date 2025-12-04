@@ -1,8 +1,23 @@
 package ru.kafpin.repositories
 
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.withContext
 import ru.kafpin.data.dao.*
+import ru.kafpin.data.models.AuthorEntity
+import ru.kafpin.data.models.BookEntity
 import ru.kafpin.data.models.BookWithDetails
+import ru.kafpin.data.models.GenreEntity
 
 class BookDetailsRepository(
     private val bookDao: BookDao,
@@ -119,5 +134,29 @@ class BookDetailsRepository(
                 genres = bookGenres
             )
         }
+    }
+
+    // ==================== ГЛАВНЫЙ FLOW МЕТОД ====================
+
+    fun getAllBooksWithDetailsFlow(): Flow<List<BookWithDetails>> {
+        return merge(
+            bookDao.getAllBooksFlow().map { "books" },
+            authorDao.getAllAuthorsFlow().map { "authors" },
+            genreDao.getAllGenresFlow().map { "genres" },
+            bookAuthorDao.getAllAuthorRelationsFlow().map { "author_rels" },
+            bookGenreDao.getAllGenreRelationsFlow().map { "genre_rels" }
+        )
+            .onStart {
+                emit("initial_load")
+            }
+            .distinctUntilChanged()
+            .flatMapLatest { changeReason ->
+                flow {
+                    val result = withContext(Dispatchers.IO) {
+                        getAllBooksWithDetails()
+                    }
+                    emit(result)
+                }.flowOn(Dispatchers.IO)
+            }
     }
 }

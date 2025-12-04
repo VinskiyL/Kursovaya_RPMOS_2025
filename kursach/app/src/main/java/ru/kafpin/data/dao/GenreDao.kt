@@ -1,6 +1,7 @@
 package ru.kafpin.data.dao
 
 import androidx.room.*
+import kotlinx.coroutines.flow.Flow
 import ru.kafpin.data.models.GenreEntity
 
 @Dao
@@ -29,4 +30,10 @@ interface GenreDao {
 
     @Query("DELETE FROM genres WHERE id IN (:ids)")
     suspend fun deleteGenresByIds(ids: List<Long>)
+
+    @Query("SELECT * FROM genres")
+    fun getAllGenresFlow(): Flow<List<GenreEntity>>
+
+    @Query("SELECT * FROM genres WHERE id IN (:genreIds)")
+    fun getGenresByIdsFlow(genreIds: List<Long>): Flow<List<GenreEntity>>
 }

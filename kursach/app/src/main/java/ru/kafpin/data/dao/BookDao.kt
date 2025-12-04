@@ -1,6 +1,7 @@
 package ru.kafpin.data.dao
 
 import androidx.room.*
+import kotlinx.coroutines.flow.Flow
 import ru.kafpin.data.models.BookEntity
 
 @Dao
@@ -51,4 +52,34 @@ interface BookDao {
 
     @Query("DELETE FROM books WHERE id IN (:ids)")
     suspend fun deleteBooksByIds(ids: List<Long>)
+
+    // FLOW МЕТОДЫ:
+    @Query("SELECT * FROM books")
+    fun getAllBooksFlow(): Flow<List<BookEntity>>
+
+    @Query("SELECT * FROM books WHERE id = :bookId")
+    fun getBookFlow(bookId: Long): Flow<BookEntity?>
+
+    @Query("SELECT * FROM books LIMIT :limit OFFSET :offset")
+    fun getBooksPaginatedFlow(limit: Int, offset: Int): Flow<List<BookEntity>>
+
+    @Query("SELECT * FROM books WHERE LOWER(title) LIKE '%' || LOWER(:query) || '%'")
+    fun searchBooksByTitleFlow(query: String): Flow<List<BookEntity>>
+
+    @Query("""
+    SELECT DISTINCT b.* FROM books b
+    JOIN bookauthorcrossref ba ON b.id = ba.bookId
+    JOIN authors a ON ba.authorId = a.id
+    WHERE LOWER(a.surname) LIKE '%' || LOWER(:query) || '%' 
+       OR LOWER(a.name) LIKE '%' || LOWER(:query) || '%'
+    """)
+    fun searchBooksByAuthorFlow(query: String): Flow<List<BookEntity>>
+
+    @Query("""
+    SELECT DISTINCT b.* FROM books b
+    JOIN bookgenrecrossref bg ON b.id = bg.bookId
+    JOIN genres g ON bg.genreId = g.id
+    WHERE LOWER(g.name) LIKE '%' || LOWER(:query) || '%'
+    """)
+    fun searchBooksByGenreFlow(query: String): Flow<List<BookEntity>>
 }
