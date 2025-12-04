@@ -13,6 +13,9 @@ interface ApiService {
     @GET("books")
     suspend fun getAllBooks(): Response<List<Book>>
 
+    @GET("books/{id}")
+    suspend fun getBookById(@Path("id") bookId: Long): Response<Book>
+
     @GET("authors")
     suspend fun getAllAuthors(): Response<List<Author>>
 

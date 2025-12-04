@@ -3,6 +3,7 @@ package ru.kafpin.activities
 import android.content.Context
 import android.content.Intent
 import android.view.View
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
@@ -46,32 +47,52 @@ class BookDetailsActivity : BaseActivity<ActivityBookDetailsBinding>() {
             return
         }
 
-        setupToolbar()
+        setupSwipeRefresh()
         setupObservers()
         setupClickListeners()
-    }
 
-    private fun setupToolbar() {
         enableBackButton(true)
         setToolbarTitle("Детали книги")
     }
 
+    private fun setupSwipeRefresh() {
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            viewModel.refreshBook()
+        }
+
+        binding.swipeRefreshLayout.setColorSchemeResources(
+            android.R.color.holo_blue_bright,
+            android.R.color.holo_green_light,
+            android.R.color.holo_orange_light,
+            android.R.color.holo_red_light
+        )
+    }
+
     private fun setupObservers() {
-        // Наблюдаем за состоянием загрузки
+        // 1. Наблюдаем за состоянием загрузки
         lifecycleScope.launch {
             repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
                 viewModel.isLoading.collect { isLoading ->
-                    binding.progressBar.isVisible = isLoading
+                    // Не показываем ProgressBar если SwipeRefresh активен
+                    if (!binding.swipeRefreshLayout.isRefreshing) {
+                        binding.progressBar.isVisible = isLoading
+                    }
+
                     // При загрузке скрываем контент и ошибку
                     if (isLoading) {
                         binding.contentScrollView.visibility = View.GONE
                         binding.errorLayout.visibility = View.GONE
                     }
+
+                    // Останавливаем SwipeRefresh когда загрузка закончена
+                    if (!isLoading) {
+                        binding.swipeRefreshLayout.isRefreshing = false
+                    }
                 }
             }
         }
 
-        // Наблюдаем за данными книги
+        // 2. Наблюдаем за данными книги
         lifecycleScope.launch {
             repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
                 viewModel.bookDetails.collect { details ->
@@ -85,7 +106,7 @@ class BookDetailsActivity : BaseActivity<ActivityBookDetailsBinding>() {
             }
         }
 
-        // Наблюдаем за ошибками
+        // 3. Наблюдаем за ошибками
         lifecycleScope.launch {
             repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
                 viewModel.errorMessage.collect { error ->
@@ -97,56 +118,82 @@ class BookDetailsActivity : BaseActivity<ActivityBookDetailsBinding>() {
                 }
             }
         }
+
+        // 4. Наблюдаем за toast сообщениями
+        lifecycleScope.launch {
+            repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
+                viewModel.toastMessage.collect { message ->
+                    message?.let {
+                        Toast.makeText(this@BookDetailsActivity, it, Toast.LENGTH_SHORT).show()
+                        viewModel.clearToast()
+                    }
+                }
+            }
+        }
     }
 
     private fun setupClickListeners() {
         binding.retryButton.setOnClickListener {
             viewModel.retry()
         }
+
+        // Убрал refreshButton - теперь только SwipeRefresh
     }
 
     private fun bindBookDetails(details: ru.kafpin.data.models.BookWithDetails) {
         with(binding) {
-            // Основная информация
+            // ==================== ВСЕ ПОЛЯ ИЗ BookEntity ====================
+
+            // 1. Основная информация
             bookTitle.text = details.book.title
             bookIndex.text = "Индекс: ${details.book.index}"
+            bookAuthorsMark.text = "Авторский знак: ${details.book.authorsMark}"
+
+            // 2. Издательство
+            bookPlace.text = "Место издания: ${details.book.placePublication}"
+            bookInfoPublication.text = "Сведения об издании: ${details.book.informationPublication}"
+
+            // 3. Даты и объём
             bookYear.text = "Год издания: ${details.book.datePublication}"
             bookVolume.text = "Том: ${details.book.volume}"
-            bookPlace.text = "Издательство: ${details.book.placePublication}"
-            bookDescription.text = details.book.informationPublication
 
-            // Авторы
+            // 4. Количество
+            val total = details.book.quantityTotal
+            val remaining = details.book.quantityRemaining
+            val isAvailable = remaining > 0
+
+            bookTotal.text = "Всего экземпляров: $total"
+            bookRemaining.text = "Осталось: $remaining"
+
+            bookAvailability.text = if (isAvailable) {
+                "✅ Доступно для выдачи"
+            } else {
+                "❒ Нет в наличии"
+            }
+
+            // 5. Авторы
             if (details.authors.isNotEmpty()) {
                 authorsLabel.visibility = View.VISIBLE
                 authorsList.visibility = View.VISIBLE
-                authorsList.text = details.authorsFormatted
+                authorsList.text = details.authors.joinToString("\n") { author ->
+                    "${author.surname} ${author.name ?: ""} ${author.patronymic ?: ""}".trim()
+                }
             } else {
                 authorsLabel.visibility = View.GONE
                 authorsList.visibility = View.GONE
             }
 
-            // Жанры
+            // 6. Жанры
             if (details.genres.isNotEmpty()) {
                 genresLabel.visibility = View.VISIBLE
                 genresList.visibility = View.VISIBLE
-                genresList.text = details.genresFormatted
+                genresList.text = details.genres.joinToString("\n") { it.name }
             } else {
                 genresLabel.visibility = View.GONE
                 genresList.visibility = View.GONE
             }
 
-            // Доступность
-            val total = details.book.quantityTotal
-            val remaining = details.book.quantityRemaining
-            val isAvailable = remaining > 0
-
-            bookAvailability.text = if (isAvailable) {
-                "✅ Доступно: $remaining из $total"
-            } else {
-                "❌ Нет в наличии"
-            }
-
-            // Обложка
+            // 7. Обложка
             val fullImageUrl = COVER_URL + details.book.cover
             Glide.with(this@BookDetailsActivity)
                 .load(fullImageUrl)
@@ -155,10 +202,16 @@ class BookDetailsActivity : BaseActivity<ActivityBookDetailsBinding>() {
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(bookCover)
 
-            bookYear.isVisible = true
-            bookVolume.isVisible = true
-            bookIndex.isVisible = true
-            bookPlace.isVisible = true
+            // ==================== ВИДИМОСТЬ ПОЛЕЙ ====================
+            bookTitle.isVisible = details.book.title.isNotBlank()
+            bookIndex.isVisible = details.book.index.isNotBlank()
+            bookAuthorsMark.isVisible = details.book.authorsMark.isNotBlank()
+            bookPlace.isVisible = details.book.placePublication.isNotBlank()
+            bookInfoPublication.isVisible = details.book.informationPublication.isNotBlank()
+            bookYear.isVisible = details.book.datePublication.isNotBlank()
+            bookVolume.isVisible = details.book.volume > 0
+            bookTotal.isVisible = details.book.quantityTotal > 0
+            bookRemaining.isVisible = true // всегда показываем
         }
     }
 
@@ -168,6 +221,7 @@ class BookDetailsActivity : BaseActivity<ActivityBookDetailsBinding>() {
             errorLayout.visibility = View.VISIBLE
             contentScrollView.visibility = View.GONE
             progressBar.visibility = View.GONE
+            swipeRefreshLayout.isRefreshing = false
         }
     }
 }

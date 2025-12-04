@@ -314,4 +314,32 @@ class BookRepository(context: Context) {
             throw e
         }
     }
+
+    suspend fun syncSingleBook(bookId: Long): Boolean {
+        Log.d(TAG, "🔄 syncSingleBook($bookId) called")
+
+        if (!networkMonitor.isOnline.value) {
+            Log.d(TAG, "📡 No internet for single book sync")
+            return false
+        }
+
+        return try {
+            val response = apiService.getBookById(bookId)
+
+            if (response.isSuccessful && response.body() != null) {
+                val remoteBook = response.body()!!
+                val bookEntity = remoteBook.toBookEntity()
+                database.bookDao().insertBooks(listOf(bookEntity))
+                Log.d(TAG, "✅ Single book sync successful: $bookId")
+                true
+            } else {
+                database.bookDao().deleteBooksByIds(listOf(bookId))
+                Log.d(TAG, "🗑️ Book $bookId deleted from server, removed from local DB")
+                true
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Error syncing book $bookId", e)
+            false
+        }
+    }
 }

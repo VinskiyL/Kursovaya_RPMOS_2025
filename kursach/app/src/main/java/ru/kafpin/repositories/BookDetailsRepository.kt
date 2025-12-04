@@ -159,4 +159,17 @@ class BookDetailsRepository(
                 }.flowOn(Dispatchers.IO)
             }
     }
+
+    fun getBookWithDetailsFlow(bookId: Long): Flow<BookWithDetails?> {
+        return bookDao.getBookFlow(bookId)
+            .distinctUntilChanged()
+            .flatMapLatest { bookEntity ->
+                flow {
+                    val result = withContext(Dispatchers.IO) {
+                        getBookWithDetails(bookId)
+                    }
+                    emit(result)
+                }.flowOn(Dispatchers.IO)
+            }
+    }
 }
