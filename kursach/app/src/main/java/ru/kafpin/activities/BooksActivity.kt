@@ -1,5 +1,7 @@
 package ru.kafpin.activities
 
+import android.content.Context
+import android.content.Intent
 import android.util.Log
 import android.view.View
 import android.view.Menu
@@ -15,6 +17,8 @@ import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.launch
 import ru.kafpin.R
 import ru.kafpin.viewmodels.BookViewModelFactory
+import ru.kafpin.data.LibraryDatabase
+import ru.kafpin.data.RepositoryProvider
 
 class BooksActivity : BaseActivity<ActivityBooksBinding>() {
     private val TAG = "BooksActivity"
@@ -39,7 +43,10 @@ class BooksActivity : BaseActivity<ActivityBooksBinding>() {
         setupClickListeners()
 
         setToolbarTitle("Библиотека")
-        enableBackButton(false)
+        setupToolbarButtons(
+            showBackButton = true,
+            showLogoutButton = true
+        )
         showLoadingState()
     }
 
@@ -69,7 +76,7 @@ class BooksActivity : BaseActivity<ActivityBooksBinding>() {
         Log.d(TAG, "setupSwipeRefresh()")
         binding.swipeRefreshLayout.setOnRefreshListener {
             Log.d(TAG, "Swipe to refresh triggered")
-            viewModel.refresh()
+            checkTokenAndRefresh()
         }
 
         binding.swipeRefreshLayout.setColorSchemeResources(
@@ -222,8 +229,70 @@ class BooksActivity : BaseActivity<ActivityBooksBinding>() {
 
         binding.retryButton.setOnClickListener {
             Log.d(TAG, "Retry button clicked")
-            viewModel.refresh()
+            checkTokenAndRefresh()
         }
+    }
+
+    private fun checkTokenAndRefresh() {
+        lifecycleScope.launch {
+            try {
+                val database = LibraryDatabase.getInstance(this@BooksActivity)
+
+                val authRepository = RepositoryProvider.getAuthRepository(database, this@BooksActivity)
+                val sessionInfo = authRepository.getSessionInfo()
+                Log.d(TAG, "📊 Информация о сессии: $sessionInfo")
+
+                val status = sessionInfo["status"] as? String ?: "unknown"
+
+                when (status) {
+                    "no_session" -> {
+                        Log.w(TAG, "❌ Нет активной сессии")
+                        showToast("Нет активной сессии. Войдите заново.")
+                        navigateToLogin()
+                        return@launch
+                    }
+
+                    "expired" -> {
+                        Log.w(TAG, "⏰ Токены истекли")
+                        showToast("Сессия истекла. Войдите заново.")
+                        authRepository.forceLogout()
+                        navigateToLogin()
+                        return@launch
+                    }
+
+                    "refresh_expiring" -> {
+                        Log.w(TAG, "⚠️ Refresh token скоро истечёт")
+                        showToast("Сессия скоро истечёт. Рекомендуем перезайти.")
+                        if (authRepository.refreshTokenIfNeeded()) {
+                            showToast("Токен обновлён")
+                        }
+                    }
+
+                    "can_refresh" -> {
+                        Log.d(TAG, "🔄 Можно обновить токен")
+                        authRepository.refreshTokenIfNeeded()
+                    }
+
+                    "access_valid" -> {
+                        Log.d(TAG, "✅ Токен валиден")
+                    }
+                }
+
+                viewModel.refresh()
+
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Ошибка при проверке токена", e)
+                showToast("Ошибка проверки токена")
+                viewModel.refresh()
+            }
+        }
+    }
+
+    private fun navigateToLogin() {
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
 
     // region Состояния UI
@@ -283,5 +352,12 @@ class BooksActivity : BaseActivity<ActivityBooksBinding>() {
     private fun showBookDetails(bookWithDetails: ru.kafpin.data.models.BookWithDetails) {
         Log.d(TAG, "showBookDetails() for book ID: ${bookWithDetails.book.id}, title: ${bookWithDetails.book.title}")
         BookDetailsActivity.start(this, bookWithDetails.book.id)
+    }
+
+    companion object {
+        fun start(context: Context) {
+            val intent = Intent(context, BooksActivity::class.java)
+            context.startActivity(intent)
+        }
     }
 }

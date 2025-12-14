@@ -1,30 +1,50 @@
 package ru.kafpin.api
 
 import retrofit2.Response
-import retrofit2.http.GET
-import retrofit2.http.Path
-import ru.kafpin.api.models.Author
-import ru.kafpin.api.models.AuthorBook
-import ru.kafpin.api.models.Book
-import ru.kafpin.api.models.BookGenre
-import ru.kafpin.api.models.Genre
+import retrofit2.http.*
+import ru.kafpin.api.models.*
 
 interface ApiService {
     @GET("books")
-    suspend fun getAllBooks(): Response<List<Book>>
+    suspend fun getAllBooks(
+        @Header("Authorization") token: String? = null
+    ): Response<List<Book>>
 
     @GET("books/{id}")
-    suspend fun getBookById(@Path("id") bookId: Long): Response<Book>
+    suspend fun getBookById(
+        @Path("id") bookId: Long,
+        @Header("Authorization") token: String? = null
+    ): Response<Book>
 
     @GET("authors")
-    suspend fun getAllAuthors(): Response<List<Author>>
+    suspend fun getAllAuthors(
+        @Header("Authorization") token: String? = null
+    ): Response<List<Author>>
 
     @GET("genres")
-    suspend fun getAllGenres(): Response<List<Genre>>
+    suspend fun getAllGenres(
+        @Header("Authorization") token: String? = null
+    ): Response<List<Genre>>
 
     @GET("authors-books")
-    suspend fun getAllAuthorBooks(): Response<List<AuthorBook>>
+    suspend fun getAllAuthorBooks(
+        @Header("Authorization") token: String? = null
+    ): Response<List<AuthorBook>>
 
     @GET("books-genres")
-    suspend fun getAllBookGenres(): Response<List<BookGenre>>
+    suspend fun getAllBookGenres(
+        @Header("Authorization") token: String? = null
+    ): Response<List<BookGenre>>
+
+    @POST("auth/login")
+    suspend fun login(@Body request: LoginRequest): Response<AuthResponse>
+
+    @POST("auth/refresh")
+    suspend fun refreshToken(@Body request: RefreshTokenRequest): Response<AuthResponse>
+
+    @POST("auth/logout")
+    suspend fun logout(): Response<Void>
+
+    @GET("auth/me")
+    suspend fun getCurrentUser(@Header("Authorization") token: String): Response<UserResponse>
 }

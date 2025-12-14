@@ -1,39 +1,103 @@
 package ru.kafpin.activities
 
+import android.content.Context
+import android.content.Intent
+import android.os.Bundle
+import android.util.Log
+import android.view.View
+import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import ru.kafpin.data.LibraryDatabase
+import ru.kafpin.data.RepositoryProvider
 import ru.kafpin.databinding.ActivityMainBinding
 
 class MainActivity : BaseActivity<ActivityMainBinding>() {
+
+    private val TAG = "MainActivity"
 
     override fun inflateBinding(): ActivityMainBinding {
         return ActivityMainBinding.inflate(layoutInflater)
     }
 
     override fun setupUI() {
+        Log.d(TAG, "setupUI()")
+
         // Настройка тулбара
         setToolbarTitle("Главная")
 
-        // Простой текст в центре
-        binding.welcomeText.text = "Добро пожаловать в мое приложение!"
-        binding.subtitleText.text = "Курсовой проект"
+        setupToolbarButtons(
+            showBackButton = false,
+            showLogoutButton = true
+        )
 
-        // Можно добавить клик-обработчики если нужно
-        binding.clickableText.setOnClickListener {
-            binding.welcomeText.text = "Текст изменен по клику!"
+        updateToolbarWithUserAndNetwork()
+
+        observeNetworkStatus()
+    }
+
+    private fun updateToolbarWithUserAndNetwork() {
+        lifecycleScope.launch {
+            val database = LibraryDatabase.getInstance(this@MainActivity)
+
+            val authRepository = RepositoryProvider.getAuthRepository(database, this@MainActivity)
+
+            val currentUser = authRepository.getCurrentUser()
+            val isOnline = networkMonitor.isOnline.value
+            val networkStatus = if (isOnline) "✅ Онлайн" else "🔴 Офлайн"
+
+            val title = if (currentUser != null) {
+                val userName = currentUser.displayName ?: currentUser.login
+                "$userName • $networkStatus"
+            } else {
+                "Гость • $networkStatus"
+            }
+
+            setToolbarTitle(title)
+        }
+    }
+
+    private fun observeNetworkStatus() {
+        lifecycleScope.launch {
+            networkMonitor.isOnline.collect { isOnline ->
+                updateToolbarWithUserAndNetwork()
+                if (lifecycle.currentState.isAtLeast(androidx.lifecycle.Lifecycle.State.RESUMED)) {
+                    val message = if (isOnline) "✅ Сеть восстановлена" else "🔴 Нет подключения"
+                    Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    fun showSettings(view: View) {
+        Toast.makeText(this, "Настройки в разработке", Toast.LENGTH_SHORT).show()
+    }
+
+    fun showProfile(view: View) {
+        Toast.makeText(this, "Профиль в разработке", Toast.LENGTH_SHORT).show()
+    }
+
+    fun showComments(view: View) {
+        Toast.makeText(this, "Комментарии в разработке", Toast.LENGTH_SHORT).show()
+    }
+
+    fun showOrderList(view: View) {
+        Toast.makeText(this, "Список заказов в разработке", Toast.LENGTH_SHORT).show()
+    }
+
+    fun showBookingList(view: View) {
+        Toast.makeText(this, "Бронирования в разработке", Toast.LENGTH_SHORT).show()
+    }
+
+    fun showBookList(view: View) {
+        Log.d(TAG, "showBookList()")
+        BooksActivity.start(this)
+    }
+
+    companion object {
+        fun start(context: Context) {
+            val intent = Intent(context, MainActivity::class.java)
+            context.startActivity(intent)
         }
     }
 }
-
-/*class MainActivity : AppCompatActivity() {
-    private lateinit var syncService: SmartSyncService
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        syncService = SmartSyncService(this)
-
-        // Запускаем фоновую синхронизацию при старте
-        lifecycleScope.launch {
-            syncService.syncIfNeeded()
-        }
-    }
-}*/

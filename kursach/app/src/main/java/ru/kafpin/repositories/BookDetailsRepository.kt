@@ -136,8 +136,6 @@ class BookDetailsRepository(
         }
     }
 
-    // ==================== ГЛАВНЫЙ FLOW МЕТОД ====================
-
     fun getAllBooksWithDetailsFlow(): Flow<List<BookWithDetails>> {
         return merge(
             bookDao.getAllBooksFlow().map { "books" },

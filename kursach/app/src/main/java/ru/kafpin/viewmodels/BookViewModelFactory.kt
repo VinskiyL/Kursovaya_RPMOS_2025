@@ -26,7 +26,7 @@ class BookViewModelFactory(private val context: Context) : ViewModelProvider.Fac
         return BookViewModel(
             bookRepository = bookRepository,
             bookDetailsRepository = bookDetailsRepository,
-            networkMonitor = networkMonitor
+            context = context
         ) as T
     }
 }

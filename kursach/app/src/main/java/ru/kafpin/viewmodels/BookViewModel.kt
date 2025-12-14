@@ -1,5 +1,6 @@
 package ru.kafpin.viewmodels
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,14 +14,12 @@ import ru.kafpin.repositories.BookRepository
 class BookViewModel(
     private val bookRepository: BookRepository,
     private val bookDetailsRepository: ru.kafpin.repositories.BookDetailsRepository,
-    private val networkMonitor: ru.kafpin.utils.NetworkMonitor
+    private val context: Context
 ) : ViewModel() {
 
     private val TAG = "BookViewModel"
+    private val networkMonitor = (context.applicationContext as ru.kafpin.MyApplication).networkMonitor
 
-    // ==================== НОВЫЕ FLOW ====================
-
-    // Главный Flow для автообновления данных
     val allBooksWithDetails: StateFlow<List<ru.kafpin.data.models.BookWithDetails>> =
         bookDetailsRepository.getAllBooksWithDetailsFlow()
             .stateIn(
@@ -28,8 +27,6 @@ class BookViewModel(
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = emptyList()
             )
-
-    // ==================== СУЩЕСТВУЮЩИЕ StateFlow ====================
 
     private val _currentPageBooks = MutableStateFlow<List<ru.kafpin.data.models.BookWithDetails>>(emptyList())
     val currentPageBooks: StateFlow<List<ru.kafpin.data.models.BookWithDetails>> = _currentPageBooks.asStateFlow()
@@ -119,8 +116,16 @@ class BookViewModel(
         Log.d(TAG, "refresh() called, isLoading=${_isLoading.value}, isOnline=${_isOnline.value}")
 
         if (_isLoading.value) {
-            Log.d(TAG, "Already loading, skipping")
-            return
+            Log.d(TAG, "Already loading, but forcing refresh anyway...")
+            // Принудительно сбрасываем состояние, если что-то зависло
+            if (_isLoading.value && System.currentTimeMillis() % 10000 > 5000) {
+                // Если isLoading true более 5 секунд - сбрасываем
+                _isLoading.value = false
+                Log.w(TAG, "⚠️ Forcibly reset isLoading state - was stuck!")
+            } else {
+                Log.d(TAG, "Skipping refresh - already loading")
+                return
+            }
         }
 
         _isLoading.value = true
@@ -134,6 +139,7 @@ class BookViewModel(
 
                     if (success) {
                         Log.d(TAG, "✅ Sync successful")
+                        _errorMessage.value = null
                     } else {
                         Log.w(TAG, "⚠️ Sync failed")
                         _errorMessage.value = "Не удалось обновиться"
@@ -142,14 +148,15 @@ class BookViewModel(
                     Log.d(TAG, "📴 Offline mode - reloading local books")
                     _errorMessage.value = "Офлайн режим - данные могут быть устаревшими"
                 }
-            }catch (e: kotlinx.coroutines.CancellationException) {
+            } catch (e: kotlinx.coroutines.CancellationException) {
                 Log.d(TAG, "Refresh cancelled")
+                _errorMessage.value = "Обновление отменено"
             } catch (e: Exception) {
                 Log.e(TAG, "❌ Refresh error", e)
                 _errorMessage.value = "Ошибка обновления: ${e.message}"
             } finally {
                 _isLoading.value = false
-                Log.d(TAG, "refresh completed")
+                Log.d(TAG, "refresh completed, isLoading set to false")
             }
         }
     }

@@ -51,7 +51,10 @@ class BookDetailsActivity : BaseActivity<ActivityBookDetailsBinding>() {
         setupObservers()
         setupClickListeners()
 
-        enableBackButton(true)
+        setupToolbarButtons(
+            showBackButton = true,
+            showLogoutButton = true
+        )
         setToolbarTitle("Детали книги")
     }
 
@@ -73,18 +76,15 @@ class BookDetailsActivity : BaseActivity<ActivityBookDetailsBinding>() {
         lifecycleScope.launch {
             repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
                 viewModel.isLoading.collect { isLoading ->
-                    // Не показываем ProgressBar если SwipeRefresh активен
                     if (!binding.swipeRefreshLayout.isRefreshing) {
                         binding.progressBar.isVisible = isLoading
                     }
 
-                    // При загрузке скрываем контент и ошибку
                     if (isLoading) {
                         binding.contentScrollView.visibility = View.GONE
                         binding.errorLayout.visibility = View.GONE
                     }
 
-                    // Останавливаем SwipeRefresh когда загрузка закончена
                     if (!isLoading) {
                         binding.swipeRefreshLayout.isRefreshing = false
                     }
@@ -112,7 +112,6 @@ class BookDetailsActivity : BaseActivity<ActivityBookDetailsBinding>() {
                 viewModel.errorMessage.collect { error ->
                     error?.let {
                         showErrorState(it)
-                        // При ошибке показываем только её, скрываем контент
                         binding.contentScrollView.visibility = View.GONE
                     }
                 }
@@ -137,12 +136,10 @@ class BookDetailsActivity : BaseActivity<ActivityBookDetailsBinding>() {
             viewModel.retry()
         }
 
-        // Убрал refreshButton - теперь только SwipeRefresh
     }
 
     private fun bindBookDetails(details: ru.kafpin.data.models.BookWithDetails) {
         with(binding) {
-            // ==================== ВСЕ ПОЛЯ ИЗ BookEntity ====================
 
             // 1. Основная информация
             bookTitle.text = details.book.title
@@ -211,7 +208,7 @@ class BookDetailsActivity : BaseActivity<ActivityBookDetailsBinding>() {
             bookYear.isVisible = details.book.datePublication.isNotBlank()
             bookVolume.isVisible = details.book.volume > 0
             bookTotal.isVisible = details.book.quantityTotal > 0
-            bookRemaining.isVisible = true // всегда показываем
+            bookRemaining.isVisible = true
         }
     }
 
