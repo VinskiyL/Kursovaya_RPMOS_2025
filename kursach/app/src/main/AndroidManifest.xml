@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".MyApplication"
@@ -16,26 +17,32 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Kursach"
         android:usesCleartextTraffic="true">
-
+        <activity
+            android:name=".activities.SettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.BookingDetailsActivity"
+            android:exported="false" />
         <activity
             android:name=".activities.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".activities.MainActivity"
             android:exported="false" />
-
         <activity
             android:name=".activities.BookDetailsActivity"
             android:exported="false" />
-
         <activity
             android:name=".activities.BooksActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.MyBookingsActivity"
             android:exported="false" />
 
         <provider
@@ -43,7 +50,6 @@
             android:authorities="${applicationId}.androidx-startup"
             android:exported="false"
             tools:node="merge" />
-
     </application>
 
 </manifest>

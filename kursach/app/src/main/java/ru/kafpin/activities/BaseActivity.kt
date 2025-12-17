@@ -27,8 +27,9 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
 
     protected val networkMonitor get() = (application as MyApplication).networkMonitor
 
-    private lateinit var btnBack: ImageButton
+    protected lateinit var btnBack: ImageButton
     private lateinit var btnLogout: ImageButton
+
 
     abstract fun inflateBinding(): VB
     abstract fun setupUI()

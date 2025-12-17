@@ -5,6 +5,7 @@ import android.content.Intent
 import android.util.Log
 import android.view.View
 import android.view.Menu
+import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
@@ -45,7 +46,7 @@ class BooksActivity : BaseActivity<ActivityBooksBinding>() {
         setToolbarTitle("Библиотека")
         setupToolbarButtons(
             showBackButton = true,
-            showLogoutButton = true
+            showLogoutButton = false
         )
         showLoadingState()
     }
@@ -58,6 +59,18 @@ class BooksActivity : BaseActivity<ActivityBooksBinding>() {
         val searchView = searchItem.actionView as androidx.appcompat.widget.SearchView
 
         searchView.queryHint = "Поиск по названию..."
+
+        searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionExpand(item: MenuItem): Boolean {
+                btnBack.visibility = View.GONE
+                return true
+            }
+
+            override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
+                btnBack.visibility = View.VISIBLE
+                return true
+            }
+        })
 
         searchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean = false
@@ -187,9 +200,9 @@ class BooksActivity : BaseActivity<ActivityBooksBinding>() {
 
     private fun updateToolbarWithNetworkStatus(isOnline: Boolean) {
         Log.d(TAG, "updateToolbarWithNetworkStatus: $isOnline")
-        val networkStatus = if (isOnline) "✅ Онлайн" else "🔴 Офлайн"
+        val networkStatus = if (isOnline) "✅ on" else "🔴 off"
         val bookCount = viewModel.allBooksWithDetails.value.size
-        val title = "Библиотека ($bookCount книг) $networkStatus"
+        val title = "$bookCount книг $networkStatus"
         Log.d(TAG, "Setting toolbar title: '$title'")
         setToolbarTitle(title)
     }
@@ -200,12 +213,12 @@ class BooksActivity : BaseActivity<ActivityBooksBinding>() {
         val currentTitle = supportActionBar?.title?.toString() ?: ""
 
         val networkStatus = when {
-            currentTitle.contains("✅") -> " ✅ Онлайн"
-            currentTitle.contains("🔴") -> " 🔴 Офлайн"
+            currentTitle.contains("✅") -> " ✅ on"
+            currentTitle.contains("🔴") -> " 🔴 off"
             else -> ""
         }
 
-        setToolbarTitle("Библиотека ($bookCount книг)$networkStatus")
+        setToolbarTitle("$bookCount книг $networkStatus")
     }
 
     private fun stopSwipeRefresh() {
@@ -282,7 +295,7 @@ class BooksActivity : BaseActivity<ActivityBooksBinding>() {
 
             } catch (e: Exception) {
                 Log.e(TAG, "❌ Ошибка при проверке токена", e)
-                showToast("Ошибка проверки токена")
+                showToast("Ошибка. Повторите позднее.")
                 viewModel.refresh()
             }
         }

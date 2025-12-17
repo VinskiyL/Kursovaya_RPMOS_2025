@@ -5,12 +5,11 @@ import android.content.ContentValues.TAG
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import androidx.work.Constraints
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.NetworkType
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
+import androidx.work.*
 import ru.kafpin.utils.NetworkMonitor
+import ru.kafpin.utils.NotificationHelper
+import ru.kafpin.workers.BookingSyncWorker
+import ru.kafpin.workers.DailyExpiryWorker
 import ru.kafpin.workers.SyncWorker
 import java.util.concurrent.TimeUnit
 
@@ -25,8 +24,9 @@ class MyApplication : Application() {
         super.onCreate()
         Log.d(TAG, "📱 Application создана")
 
-        // Запускаем NetworkMonitor
         networkMonitor
+
+        NotificationHelper.createNotificationChannel(this)
 
         Handler(Looper.getMainLooper()).postDelayed({
             setupWorkManager()
@@ -36,29 +36,56 @@ class MyApplication : Application() {
     private fun setupWorkManager() {
         Log.d(TAG, "⚙️ Настраиваем WorkManager...")
 
-        // 1. Создаём Constraints (ограничения)
         val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.NOT_REQUIRED) // Любая сеть
+            .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
             .build()
 
-        // 2. Создаём периодическую работу
-        val syncWorkRequest = PeriodicWorkRequestBuilder<SyncWorker>(
-            15, TimeUnit.MINUTES // Интервал 15 минут
-        )
-            .setConstraints(constraints)
-            .addTag("BOOK_SYNC") // Тег для управления
-            .build()
-
-        // 3. Получаем WorkManager
         val workManager = WorkManager.getInstance(this)
 
-        // 4. Запускаем UNIQUE работу (чтобы не дублировать)
+        val bookingSyncRequest = PeriodicWorkRequestBuilder<BookingSyncWorker>(
+            1, TimeUnit.MINUTES
+        )
+            .setConstraints(constraints)
+            .setInitialDelay(0, TimeUnit.MINUTES)
+            .addTag("BOOKING_SYNC")
+            .build()
+
         workManager.enqueueUniquePeriodicWork(
-            "UNIQUE_BOOK_SYNC", // Уникальное имя
-            ExistingPeriodicWorkPolicy.UPDATE, // Обновляем если уже есть
+            "UNIQUE_BOOKING_SYNC",
+            ExistingPeriodicWorkPolicy.UPDATE,
+            bookingSyncRequest
+        )
+
+        val syncWorkRequest = PeriodicWorkRequestBuilder<SyncWorker>(
+            15, TimeUnit.MINUTES
+        )
+            .setConstraints(constraints)
+            .setInitialDelay(5, TimeUnit.MINUTES)
+            .addTag("BOOK_SYNC")
+            .build()
+
+        workManager.enqueueUniquePeriodicWork(
+            "UNIQUE_BOOK_SYNC",
+            ExistingPeriodicWorkPolicy.UPDATE,
             syncWorkRequest
         )
 
-        Log.d(TAG, "✅ WorkManager настроен, синхронизация каждые 15 минут")
+        val cleanupRequest = PeriodicWorkRequestBuilder<DailyExpiryWorker>(
+            24, TimeUnit.HOURS
+        )
+            .setInitialDelay(16, TimeUnit.MINUTES)
+            .addTag("DAILY_CLEANUP")
+            .build()
+
+        workManager.enqueueUniquePeriodicWork(
+            "UNIQUE_DAILY_CLEANUP",
+            ExistingPeriodicWorkPolicy.UPDATE,
+            cleanupRequest
+        )
+
+        Log.d(TAG, "✅ Все Workers настроены")
+        Log.d(TAG, "📅 Брони: каждую 1 мин (сразу)")
+        Log.d(TAG, "📚 Книги: каждые 15 мин (через 5 мин)")
+        Log.d(TAG, "🧹 Очистка: каждые 24 ч")
     }
 }

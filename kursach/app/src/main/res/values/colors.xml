@@ -7,6 +7,10 @@
     <color name="gray">#FF666666</color>
     <color name="dark_gray">#FF444444</color>
     <color name="light_gray">#FFEEEEEE</color>
+    <color name="status_pending">#FFC107</color>
+    <color name="status_confirmed">#4CAF50</color>
+    <color name="status_issued">#2196F3</color>
+    <color name="status_returned">#9E9E9E</color>
 
     <!-- Статусы -->
     <color name="status_available">#FF4CAF50</color>

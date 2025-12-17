@@ -7,7 +7,7 @@ data class AuthResponse(
     val accessToken: String,
 
     @SerializedName("refreshToken")
-    val refreshToken: String,    // ← СЕРВЕР ДОЛЖЕН ВОЗВРАЩАТЬ!
+    val refreshToken: String,
 
     @SerializedName("tokenType")
     val tokenType: String = "Bearer",

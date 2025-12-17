@@ -13,6 +13,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import kotlinx.coroutines.launch
 import ru.kafpin.R
 import ru.kafpin.databinding.ActivityBookDetailsBinding
+import ru.kafpin.ui.bookings.CreateBookingDialog
 import ru.kafpin.utils.Constants.COVER_URL
 import ru.kafpin.viewmodels.BookDetailsViewModel
 import ru.kafpin.viewmodels.BookDetailsViewModelFactory
@@ -49,7 +50,6 @@ class BookDetailsActivity : BaseActivity<ActivityBookDetailsBinding>() {
 
         setupSwipeRefresh()
         setupObservers()
-        setupClickListeners()
 
         setupToolbarButtons(
             showBackButton = true,
@@ -98,7 +98,6 @@ class BookDetailsActivity : BaseActivity<ActivityBookDetailsBinding>() {
                 viewModel.bookDetails.collect { details ->
                     details?.let {
                         bindBookDetails(it)
-                        // Показываем контент, скрываем ошибку
                         binding.contentScrollView.visibility = View.VISIBLE
                         binding.errorLayout.visibility = View.GONE
                     }
@@ -111,8 +110,8 @@ class BookDetailsActivity : BaseActivity<ActivityBookDetailsBinding>() {
             repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
                 viewModel.errorMessage.collect { error ->
                     error?.let {
-                        showErrorState(it)
-                        binding.contentScrollView.visibility = View.GONE
+                        Toast.makeText(this@BookDetailsActivity, it, Toast.LENGTH_LONG).show()
+                        viewModel.clearError()
                     }
                 }
             }
@@ -123,24 +122,53 @@ class BookDetailsActivity : BaseActivity<ActivityBookDetailsBinding>() {
             repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
                 viewModel.toastMessage.collect { message ->
                     message?.let {
-                        Toast.makeText(this@BookDetailsActivity, it, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@BookDetailsActivity, it, Toast.LENGTH_LONG).show()
                         viewModel.clearToast()
+                    }
+                }
+            }
+        }
+
+        // 5. Наблюдаем за состоянием создания брони
+        lifecycleScope.launch {
+            repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
+                viewModel.isCreating.collect { isCreating ->
+                    // Блокируем кнопку когда создаётся бронь
+                    binding.bookButton.isEnabled = !isCreating && viewModel.canBookThisBook()
+
+                    if (isCreating) {
+                        binding.bookButton.text = "Создание..."
+                    } else {
+                        binding.bookButton.text = "Забронировать"
+                    }
+                }
+            }
+        }
+
+        // 6. Проверка наличия активной брони
+        lifecycleScope.launch {
+            repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
+                viewModel.bookDetails.collect { details ->
+                    if (details != null) {
+                        val hasActiveBooking = viewModel.hasActiveBookingForThisBook()
+
+                        val isAvailable = details.book.quantityRemaining > 0
+                        val shouldShowButton = isAvailable && !hasActiveBooking
+
+                        binding.bookButton.isVisible = shouldShowButton
+                        binding.bookButton.isEnabled = shouldShowButton && !viewModel.isCreating.value
+
+                        if (hasActiveBooking && isAvailable) {
+                            binding.bookAvailability.text = "✅ Доступно, но у вас уже есть активная бронь"
+                        }
                     }
                 }
             }
         }
     }
 
-    private fun setupClickListeners() {
-        binding.retryButton.setOnClickListener {
-            viewModel.retry()
-        }
-
-    }
-
     private fun bindBookDetails(details: ru.kafpin.data.models.BookWithDetails) {
         with(binding) {
-
             // 1. Основная информация
             bookTitle.text = details.book.title
             bookIndex.text = "Индекс: ${details.book.index}"
@@ -162,10 +190,64 @@ class BookDetailsActivity : BaseActivity<ActivityBookDetailsBinding>() {
             bookTotal.text = "Всего экземпляров: $total"
             bookRemaining.text = "Осталось: $remaining"
 
-            bookAvailability.text = if (isAvailable) {
-                "✅ Доступно для выдачи"
-            } else {
-                "❒ Нет в наличии"
+            lifecycleScope.launch {
+                val hasActiveBooking = viewModel.hasActiveBookingForThisBook()
+
+                bookAvailability.text = when {
+                    !isAvailable -> "Нет в наличии"
+                    hasActiveBooking -> "✅ Доступно, но у вас уже есть активная бронь"
+                    else -> "✅ Доступно для выдачи"
+                }
+
+                val shouldShowButton = isAvailable && !hasActiveBooking
+                bookButton.isVisible = shouldShowButton
+                bookButton.isEnabled = shouldShowButton && !viewModel.isCreating.value
+
+                if (hasActiveBooking) {
+                    Toast.makeText(
+                        this@BookDetailsActivity,
+                        "У вас уже есть активная бронь на эту книгу",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+
+            bookButton.setOnClickListener {
+                if (viewModel.canBookThisBook()) {
+                    val dialog = CreateBookingDialog.newInstance(
+                        bookId = details.book.id,
+                        bookTitle = details.book.title,
+                        quantityRemaining = details.book.quantityRemaining
+                    )
+
+                    dialog.setOnBookingCreatedListener { bookingBookId, quantity, dateIssue, dateReturn ->
+                        lifecycleScope.launch {
+                            val bookingId = viewModel.createBooking(
+                                bookId = bookingBookId,
+                                quantity = quantity,
+                                dateIssue = dateIssue,
+                                dateReturn = dateReturn
+                            )
+                            if (bookingId != null) {
+                                // УСПЕХ: Toast показывается через viewModel.toastMessage
+                                // ОШИБКИ: Показываются через viewModel.errorMessage
+                            } else {
+                                Toast.makeText(
+                                    this@BookDetailsActivity,
+                                    "Не удалось создать бронь",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                    }
+                    dialog.show(supportFragmentManager, "CreateBookingDialog")
+                } else {
+                    Toast.makeText(
+                        this@BookDetailsActivity,
+                        "Нельзя забронировать эту книгу",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
 
             // 5. Авторы

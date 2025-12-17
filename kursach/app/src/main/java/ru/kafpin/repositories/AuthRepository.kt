@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.map
 import ru.kafpin.api.ApiClient
 import ru.kafpin.api.models.*
 import ru.kafpin.data.dao.AuthDao
+import ru.kafpin.data.dao.BookingDao
 import ru.kafpin.data.dao.UserDao
 import ru.kafpin.data.mappers.toAuthSessionEntity
 import ru.kafpin.data.mappers.toUserEntity
@@ -15,6 +16,7 @@ import ru.kafpin.utils.NetworkMonitor
 class AuthRepository(
     private val authDao: AuthDao,
     private val userDao: UserDao,
+    private val bookingDao: BookingDao,
     private val networkMonitor: NetworkMonitor
 ) {
     private val TAG = "AuthRepository"
@@ -61,6 +63,10 @@ class AuthRepository(
 
     // ==================== ПОЛУЧЕНИЕ ДАННЫХ ====================
 
+    suspend fun getCurrentUserId(): Long? {
+        return getCurrentUser()?.id
+    }
+
     suspend fun getCurrentUser(): UserEntity? {
         return authDao.getActiveSession()?.let { session ->
             userDao.getUser(session.userId)
@@ -82,6 +88,7 @@ class AuthRepository(
         return authDao.getActiveSessionFlow()
             .map { it?.accessToken }
     }
+
     suspend fun isAuthenticated(): Boolean {
         return userDao.getCurrentUser() != null
     }
@@ -227,11 +234,6 @@ class AuthRepository(
         }
     }
 
-    suspend fun forceRefreshToken(): Boolean {
-        Log.d(TAG, "🔄 Принудительное обновление токена")
-        return refreshTokenIfNeeded()
-    }
-
     // ==================== ВЫХОД ====================
 
     suspend fun forceLogout() {
@@ -239,6 +241,8 @@ class AuthRepository(
 
         val session = authDao.getActiveSession()
         if (session != null) {
+            val userId = session.userId
+
             if (networkMonitor.isOnline.value) {
                 try {
                     apiService.logout()
@@ -247,9 +251,15 @@ class AuthRepository(
                     Log.w(TAG, "⚠️ Не удалось уведомить сервер: ${e.message}")
                 }
             }
+            try {
+                bookingDao.deleteByUserId(userId)
+                Log.d(TAG, "🗑️ Удалены все брони пользователя $userId")
+            } catch (e: Exception) {
+                Log.e(TAG, "Ошибка при удалении броней пользователя", e)
+            }
 
-            authDao.deleteSessionsForUser(session.userId)
-            userDao.deleteUser(session.userId)
+            authDao.deleteSessionsForUser(userId)
+            userDao.deleteUser(userId)
             Log.d(TAG, "🧹 Все данные пользователя удалены")
         }
     }
@@ -258,6 +268,7 @@ class AuthRepository(
         Log.d(TAG, "🚪 Выход из системы")
 
         val session = authDao.getActiveSession() ?: return
+        val userId = session.userId
 
         if (networkMonitor.isOnline.value) {
             try {
@@ -268,10 +279,16 @@ class AuthRepository(
             }
         }
 
-        authDao.deleteSessionsForUser(session.userId)
+        authDao.deleteSessionsForUser(userId)
+        try {
+            bookingDao.deleteByUserId(userId)
+            Log.d(TAG, "🗑️ Удалены все брони пользователя $userId")
+        } catch (e: Exception) {
+            Log.e(TAG, "Ошибка при удалении броней пользователя", e)
+        }
 
         if (clearUserData) {
-            userDao.deleteUser(session.userId)
+            userDao.deleteUser(userId)
             Log.d(TAG, "🧹 Локальная сессия и данные пользователя удалены")
         } else {
             Log.d(TAG, "🧹 Локальная сессия удалена (юзер остался для офлайн-режима)")
@@ -282,16 +299,15 @@ class AuthRepository(
         val session = authDao.getActiveSession() ?: return false
         val currentTime = System.currentTimeMillis()
 
+        Log.d(TAG, "DEBUG: refreshExpiresAt=${session.refreshExpiresAt}, " +
+                "currentTime=$currentTime, " +
+                "diff=${(session.refreshExpiresAt - currentTime) / 1000} сек, " +
+                "required=600 сек")
+
         return session.refreshExpiresAt > currentTime + 600_000L
     }
 
     // ==================== УТИЛИТЫ ====================
-
-    suspend fun clearAllAuthData() {
-        Log.d(TAG, "🧨 Очистка всех данных аутентификации")
-        authDao.clearAllSessions()
-        userDao.clearAllUsers()
-    }
 
     suspend fun getSessionInfo(): Map<String, Any> {
         val session = authDao.getActiveSession() ?: return mapOf(

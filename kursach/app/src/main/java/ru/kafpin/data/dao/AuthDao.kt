@@ -13,10 +13,10 @@ interface AuthDao {
     @Query("SELECT * FROM auth_sessions WHERE userId = :userId ORDER BY createdAt DESC LIMIT 1")
     suspend fun getLatestSession(userId: Long): AuthSessionEntity?
 
-    @Query("SELECT * FROM auth_sessions WHERE accessExpiresAt > :currentTime ORDER BY createdAt DESC LIMIT 1")
+    @Query("SELECT * FROM auth_sessions WHERE refreshExpiresAt > :currentTime ORDER BY createdAt DESC LIMIT 1")
     suspend fun getActiveSession(currentTime: Long = System.currentTimeMillis()): AuthSessionEntity?
 
-    @Query("SELECT * FROM auth_sessions WHERE accessExpiresAt > :currentTime ORDER BY createdAt DESC LIMIT 1")
+    @Query("SELECT * FROM auth_sessions WHERE refreshExpiresAt > :currentTime ORDER BY createdAt DESC LIMIT 1")
     fun getActiveSessionFlow(currentTime: Long = System.currentTimeMillis()): Flow<AuthSessionEntity?>
 
     @Query("DELETE FROM auth_sessions WHERE userId = :userId")

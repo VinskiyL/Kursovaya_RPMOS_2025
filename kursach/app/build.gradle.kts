@@ -88,4 +88,6 @@ dependencies {
     implementation(libs.glide)
 
     implementation(libs.androidx.work.runtime.ktx.v2110)
+
+    implementation(libs.androidx.preference.ktx)
 }

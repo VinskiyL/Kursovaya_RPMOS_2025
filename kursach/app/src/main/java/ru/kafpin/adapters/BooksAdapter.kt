@@ -49,24 +49,9 @@ class BooksAdapter(
 
             // Авторы
             Log.d("BooksAdapter", "Authors list size: ${bookWithDetails.authors.size}")
-            bookWithDetails.authors.forEachIndexed { index, author ->
-                Log.d("BooksAdapter",
-                    "  Author[$index]: " +
-                            "id=${author.id}, " +
-                            "authorSurname='${author.surname}', " +
-                            "authorName='${author.name}', " +
-                            "authorPatronymic='${author.patronymic}'"
-                )
-            }
-            Log.d("BooksAdapter", "authorsFormatted: '${bookWithDetails.authorsFormatted}'")
 
             // Жанры
             Log.d("BooksAdapter", "Genres list size: ${bookWithDetails.genres.size}")
-            bookWithDetails.genres.forEachIndexed { index, genre ->
-                Log.d("BooksAdapter", "  Genre[$index]: id=${genre.id}, name='${genre.name}'")
-            }
-            Log.d("BooksAdapter", "genresFormatted: '${bookWithDetails.genresFormatted}'")
-
             Log.d("BooksAdapter", "Book.cover: '${bookWithDetails.book.cover}'")
             Log.d("BooksAdapter", "Book.quantityRemaining: ${bookWithDetails.book.quantityRemaining}")
             binding.apply {

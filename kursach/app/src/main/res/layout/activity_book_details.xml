@@ -40,29 +40,24 @@
                     android:id="@+id/errorLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
                     android:gravity="center"
+                    android:orientation="vertical"
                     android:padding="16dp"
                     android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:visibility="visible">
 
                     <TextView
                         android:id="@+id/errorText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
                         android:text="Ошибка загрузки"
-                        android:textSize="16sp"
-                        android:layout_marginBottom="16dp" />
-
-                    <Button
-                        android:id="@+id/retryButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Повторить" />
-
+                        android:textColor="#000000"
+                        android:textSize="16sp" />
                 </LinearLayout>
 
                 <androidx.core.widget.NestedScrollView
@@ -73,7 +68,8 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:visibility="visible">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -88,18 +84,18 @@
                             android:layout_height="300dp"
                             android:layout_gravity="center_horizontal"
                             android:layout_marginBottom="24dp"
-                            android:scaleType="centerCrop"
-                            android:contentDescription="Обложка книги" />
+                            android:contentDescription="Обложка книги"
+                            android:scaleType="centerCrop" />
 
                         <TextView
                             android:id="@+id/bookTitle"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="16dp"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
                             android:gravity="center"
-                            android:textColor="@android:color/black" />
+                            android:textColor="@android:color/black"
+                            android:textSize="24sp"
+                            android:textStyle="bold" />
 
                         <!-- ... ВСЕ ОСТАЛЬНЫЕ ПОЛЯ КАК БЫЛИ ... -->
                         <TextView
@@ -107,6 +103,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="8dp"
+                            android:textColor="@color/black"
                             android:textSize="14sp" />
 
                         <TextView
@@ -114,6 +111,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="8dp"
+                            android:textColor="@color/black"
                             android:textSize="14sp" />
 
                         <TextView
@@ -121,6 +119,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="8dp"
+                            android:textColor="@color/black"
                             android:textSize="14sp" />
 
                         <TextView
@@ -128,14 +127,16 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="8dp"
-                            android:textSize="14sp"
-                            android:lineSpacingExtra="4dp" />
+                            android:lineSpacingExtra="4dp"
+                            android:textColor="@color/black"
+                            android:textSize="14sp" />
 
                         <TextView
                             android:id="@+id/bookYear"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="8dp"
+                            android:textColor="@color/black"
                             android:textSize="14sp" />
 
                         <TextView
@@ -143,49 +144,59 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="16dp"
+                            android:textColor="@color/black"
                             android:textSize="14sp" />
 
                         <TextView
                             android:id="@+id/authorsLabel"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_marginBottom="4dp"
                             android:text="Авторы:"
+                            android:textColor="@color/black"
                             android:textSize="16sp"
                             android:textStyle="bold"
-                            android:layout_marginBottom="4dp"
-                            android:visibility="gone" />
+                            android:visibility="gone"
+                            tools:visibility="visible" />
 
                         <TextView
                             android:id="@+id/authorsList"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="16dp"
+                            android:textColor="@color/black"
                             android:textSize="14sp"
-                            android:visibility="gone" />
+                            android:visibility="gone"
+                            tools:visibility="visible" />
 
                         <TextView
                             android:id="@+id/genresLabel"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_marginBottom="4dp"
                             android:text="Жанры:"
+                            android:textColor="@color/black"
                             android:textSize="16sp"
                             android:textStyle="bold"
-                            android:layout_marginBottom="4dp"
-                            android:visibility="gone" />
+                            android:visibility="gone"
+                            tools:visibility="visible" />
 
                         <TextView
                             android:id="@+id/genresList"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="16dp"
+                            android:textColor="@color/black"
                             android:textSize="14sp"
-                            android:visibility="gone" />
+                            android:visibility="gone"
+                            tools:visibility="visible" />
 
                         <TextView
                             android:id="@+id/bookTotal"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="8dp"
+                            android:textColor="@color/black"
                             android:textSize="14sp" />
 
                         <TextView
@@ -193,17 +204,31 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="24dp"
+                            android:textColor="@color/black"
                             android:textSize="14sp" />
 
                         <TextView
                             android:id="@+id/bookAvailability"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
-                            android:gravity="center"
                             android:layout_marginBottom="24dp"
-                            android:padding="12dp" />
+                            android:gravity="center"
+                            android:padding="12dp"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <androidx.appcompat.widget.AppCompatButton
+                            android:id="@+id/bookButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:layout_marginBottom="24dp"
+                            android:backgroundTint="@color/primary_color"
+                            android:text="Забронировать книгу"
+                            android:textColor="@android:color/white"
+                            android:visibility="gone"
+                            tools:visibility="visible" />
 
                     </LinearLayout>
                 </androidx.core.widget.NestedScrollView>

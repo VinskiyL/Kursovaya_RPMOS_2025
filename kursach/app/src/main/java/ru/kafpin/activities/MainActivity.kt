@@ -44,7 +44,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
             val currentUser = authRepository.getCurrentUser()
             val isOnline = networkMonitor.isOnline.value
-            val networkStatus = if (isOnline) "✅ Онлайн" else "🔴 Офлайн"
+            val networkStatus = if (isOnline) "✅ on" else "🔴 off"
 
             val title = if (currentUser != null) {
                 val userName = currentUser.displayName ?: currentUser.login
@@ -70,7 +70,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     }
 
     fun showSettings(view: View) {
-        Toast.makeText(this, "Настройки в разработке", Toast.LENGTH_SHORT).show()
+        Log.d(TAG, "showBookList()")
+        SettingsActivity.start(this)
     }
 
     fun showProfile(view: View) {
@@ -86,7 +87,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     }
 
     fun showBookingList(view: View) {
-        Toast.makeText(this, "Бронирования в разработке", Toast.LENGTH_SHORT).show()
+        Log.d(TAG, "showBookingList()")
+        MyBookingsActivity.start(this)
     }
 
     fun showBookList(view: View) {

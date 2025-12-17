@@ -3,6 +3,7 @@ package ru.kafpin.viewmodels
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import kotlin.IllegalArgumentException
 
 class BookDetailsViewModelFactory(
     private val context: Context,
@@ -11,9 +12,9 @@ class BookDetailsViewModelFactory(
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(BookDetailsViewModel::class.java)) {
-            return BookDetailsViewModel(context, bookId) as T
+        if (!modelClass.isAssignableFrom(BookDetailsViewModel::class.java)) {
+            throw IllegalArgumentException("Неизвестный ViewModel класс")
         }
-        throw IllegalArgumentException("Unknown ViewModel class")
+        return BookDetailsViewModel(context, bookId) as T
     }
 }

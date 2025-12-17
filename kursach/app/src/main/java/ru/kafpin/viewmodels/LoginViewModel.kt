@@ -33,10 +33,6 @@ class LoginViewModel(
     var login: String = ""
     var password: String = ""
 
-    /**
-     * 🔴 ИСПРАВЛЕНИЕ: Теперь проверяет не только наличие юзера,
-     * но и возможность продолжать сессию
-     */
     suspend fun checkExistingSession(): Boolean {
         return try {
             val hasUser = authRepository.isAuthenticated()
@@ -125,12 +121,6 @@ class LoginViewModel(
             Log.d(TAG, "✅ Принудительный выход выполнен")
         } catch (e: Exception) {
             Log.e(TAG, "Ошибка при принудительном выходе", e)
-        }
-    }
-
-    fun resetState() {
-        if (_loginState.value !is LoginState.Loading) {
-            _loginState.value = LoginState.Idle
         }
     }
 }

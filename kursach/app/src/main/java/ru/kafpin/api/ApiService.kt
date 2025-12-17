@@ -47,4 +47,24 @@ interface ApiService {
 
     @GET("auth/me")
     suspend fun getCurrentUser(@Header("Authorization") token: String): Response<UserResponse>
+
+    @POST("bookings")
+    suspend fun createBooking(@Body request: BookingCreateRequest,
+                              @Header("Authorization") token: String? = null
+    ): Response<BookingResponse>
+
+    @GET("bookings/my")
+    suspend fun getMyBookings(@Header("Authorization") token: String? = null): Response<List<BookingResponse>>
+
+    @DELETE("bookings/{id}")
+    suspend fun deleteBooking(@Path("id") id: Long,
+                              @Header("Authorization") token: String? = null
+    ): Response<Void>
+
+    @PATCH("bookings/{id}/quantity")
+    suspend fun updateBookingQuantity(
+        @Path("id") id: Long,
+        @Body request: BookingUpdateRequest,
+        @Header("Authorization") authHeader: String
+    ): Response<BookingResponse>
 }

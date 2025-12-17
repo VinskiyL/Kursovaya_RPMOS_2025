@@ -15,9 +15,10 @@ import ru.kafpin.data.models.*
         BookAuthorCrossRef::class,
         BookGenreCrossRef::class,
         UserEntity::class,
-        AuthSessionEntity::class
+        AuthSessionEntity::class,
+        BookingEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class LibraryDatabase : RoomDatabase() {
@@ -29,6 +30,7 @@ abstract class LibraryDatabase : RoomDatabase() {
     abstract fun bookGenreDao(): BookGenreDao
     abstract fun userDao(): UserDao
     abstract fun authDao(): AuthDao
+    abstract fun bookingDao(): BookingDao
 
     companion object {
         @Volatile
