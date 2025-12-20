@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Название книги -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilTitle"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Название книги"
+            app:errorEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:maxLines="1"
+                android:textColor="@color/purple_200" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Фамилия автора -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilAuthorSurname"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Фамилия автора *"
+            app:errorEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etAuthorSurname"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:maxLines="1"
+                android:textColor="@color/purple_200" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Имя автора -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilAuthorName"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Имя автора">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etAuthorName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:maxLines="1"
+                android:textColor="@color/purple_200" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Отчество автора -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilAuthorPatronymic"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Отчество автора">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etAuthorPatronymic"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:maxLines="1"
+                android:textColor="@color/purple_200" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Количество -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilQuantity"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Количество (1-5)"
+            app:errorEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etQuantity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:inputType="number"
+                android:maxLines="1"
+                android:textColor="@color/purple_200" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Год издания -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilYear"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Год издания (4 цифры)">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etYear"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionDone"
+                android:maxLines="1"
+                android:textColor="@color/purple_200" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Кнопки будут добавлены в диалоге -->
+
+    </LinearLayout>
+
+</ScrollView>

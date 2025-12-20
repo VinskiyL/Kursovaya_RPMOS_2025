@@ -18,6 +18,12 @@
         android:theme="@style/Theme.Kursach"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".activities.OrdersDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.MyOrdersActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.SettingsActivity"
             android:exported="false" />
         <activity

@@ -7,6 +7,7 @@ import ru.kafpin.api.ApiClient
 import ru.kafpin.api.models.*
 import ru.kafpin.data.dao.AuthDao
 import ru.kafpin.data.dao.BookingDao
+import ru.kafpin.data.dao.OrderDao
 import ru.kafpin.data.dao.UserDao
 import ru.kafpin.data.mappers.toAuthSessionEntity
 import ru.kafpin.data.mappers.toUserEntity
@@ -17,6 +18,7 @@ class AuthRepository(
     private val authDao: AuthDao,
     private val userDao: UserDao,
     private val bookingDao: BookingDao,
+    private val orderDao: OrderDao,
     private val networkMonitor: NetworkMonitor
 ) {
     private val TAG = "AuthRepository"
@@ -252,10 +254,17 @@ class AuthRepository(
                 }
             }
             try {
-                bookingDao.deleteByUserId(userId)
+                bookingDao.deleteAllExceptPendingByUserId(userId)
                 Log.d(TAG, "🗑️ Удалены все брони пользователя $userId")
             } catch (e: Exception) {
                 Log.e(TAG, "Ошибка при удалении броней пользователя", e)
+            }
+
+            try {
+                orderDao.deleteAllExceptLocalPendingByUserId(userId)
+                Log.d(TAG, "🗑️ Удалены заказы пользователя $userId (кроме LOCAL_PENDING)")
+            } catch (e: Exception) {
+                Log.e(TAG, "Ошибка при удалении заказов пользователя", e)
             }
 
             authDao.deleteSessionsForUser(userId)
@@ -281,10 +290,17 @@ class AuthRepository(
 
         authDao.deleteSessionsForUser(userId)
         try {
-            bookingDao.deleteByUserId(userId)
+            bookingDao.deleteAllExceptPendingByUserId(userId)
             Log.d(TAG, "🗑️ Удалены все брони пользователя $userId")
         } catch (e: Exception) {
             Log.e(TAG, "Ошибка при удалении броней пользователя", e)
+        }
+
+        try {
+            orderDao.deleteAllExceptLocalPendingByUserId(userId)
+            Log.d(TAG, "🗑️ Удалены заказы пользователя $userId (кроме LOCAL_PENDING)")
+        } catch (e: Exception) {
+            Log.e(TAG, "Ошибка при удалении заказов пользователя", e)
         }
 
         if (clearUserData) {

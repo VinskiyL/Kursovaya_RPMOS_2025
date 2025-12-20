@@ -67,4 +67,28 @@ interface ApiService {
         @Body request: BookingUpdateRequest,
         @Header("Authorization") authHeader: String
     ): Response<BookingResponse>
+
+    @POST("orders")
+    suspend fun createOrder(
+        @Body request: OrderCreateRequest,
+        @Header("Authorization") token: String? = null
+    ): Response<OrderResponse>
+
+    @GET("orders/my")
+    suspend fun getMyOrders(
+        @Header("Authorization") token: String? = null
+    ): Response<List<OrderResponse>>
+
+    @DELETE("orders/{id}")
+    suspend fun deleteOrder(
+        @Path("id") id: Long,
+        @Header("Authorization") token: String? = null
+    ): Response<Void>
+
+    @PUT("orders/{id}")
+    suspend fun updateOrder(
+        @Path("id") id: Long,
+        @Body request: OrderCreateRequest,
+        @Header("Authorization") token: String? = null
+    ): Response<OrderResponse>
 }

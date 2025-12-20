@@ -23,4 +23,9 @@
     <color name="purple_700">#FF3700B3</color>
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
+
+    <!-- Статусы заказов -->
+    <color name="status_order_pending">#FFA000</color>  <!-- Оранжевый для LOCAL_PENDING -->
+    <color name="status_order_sent">#2196F3</color>     <!-- Синий для SERVER_PENDING -->
+    <color name="status_order_confirmed">#4CAF50</color> <!-- Зелёный для CONFIRMED -->
 </resources>

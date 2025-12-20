@@ -83,7 +83,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     }
 
     fun showOrderList(view: View) {
-        Toast.makeText(this, "Список заказов в разработке", Toast.LENGTH_SHORT).show()
+        Log.d(TAG, "showOrderList()")
+        MyOrdersActivity.start(this)
     }
 
     fun showBookingList(view: View) {

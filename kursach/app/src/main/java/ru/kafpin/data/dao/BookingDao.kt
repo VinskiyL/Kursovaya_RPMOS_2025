@@ -58,4 +58,7 @@ interface BookingDao {
 
     @Query("DELETE FROM bookings WHERE userId = :userId")
     suspend fun deleteByUserId(userId: Long)
+
+    @Query("DELETE FROM bookings WHERE userId = :userId AND status != 'PENDING'")
+    suspend fun deleteAllExceptPendingByUserId(userId: Long)
 }

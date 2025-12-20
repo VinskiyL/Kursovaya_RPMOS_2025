@@ -5,11 +5,12 @@ import ru.kafpin.repositories.AuthRepository
 import ru.kafpin.repositories.BookDetailsRepository
 import ru.kafpin.repositories.BookRepository
 import ru.kafpin.repositories.BookingRepository
+import ru.kafpin.repositories.OrderRepository
 
 object RepositoryProvider {
     private var _bookDetailsRepository: BookDetailsRepository? = null
     private var _authRepository: AuthRepository? = null
-    private var _bookRepository: BookRepository? = null
+    private var _orderRepository: OrderRepository? = null
     private var _bookingRepository: BookingRepository? = null
 
     fun getBookDetailsRepository(database: LibraryDatabase): BookDetailsRepository {
@@ -32,6 +33,7 @@ object RepositoryProvider {
             authDao = database.authDao(),
             userDao = database.userDao(),
             bookingDao = database.bookingDao(),
+            orderDao = database.orderDao(),
             networkMonitor = (context.applicationContext as ru.kafpin.MyApplication).networkMonitor
         ).also {
             _authRepository = it
@@ -49,6 +51,20 @@ object RepositoryProvider {
             context = context
         ).also {
             _bookingRepository = it
+        }
+    }
+
+    fun getOrderRepository(
+        database: LibraryDatabase,
+        authRepository: AuthRepository,
+        context: Context
+    ): OrderRepository {
+        return _orderRepository ?: OrderRepository(
+            orderDao = database.orderDao(),
+            authRepository = authRepository,
+            context = context
+        ).also {
+            _orderRepository = it
         }
     }
 }
