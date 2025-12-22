@@ -124,8 +124,11 @@ class ProfileActivity : BaseActivity<ActivityProfileBinding>() {
             tvFullName.text = profile.fullName
             tvBirthday.text = profile.profile.birthday
             tvEducation.text = profile.profile.education
+            tvProfession.text = profile.profile.profession ?: "Не указано"
+            tvEducationalInst.text = profile.profile.educationalInst ?: "Не указано"
             tvPassport.text = "${profile.profile.passportSeries} ${profile.profile.passportNumber}"
             tvIssuedBy.text = profile.profile.issuedByWhom
+            tvDateIssue.text = profile.profile.dateIssue ?: "Не указано"
             tvAddress.text = profile.address
             tvPhone.text = profile.profile.phone
             tvEmail.text = profile.profile.mail

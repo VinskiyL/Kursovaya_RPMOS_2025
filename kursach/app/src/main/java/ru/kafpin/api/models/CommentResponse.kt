@@ -9,7 +9,8 @@ data class CommentResponse(
     @SerializedName("id") val id: Long,
     @SerializedName("comment") val comment: String,
     @SerializedName("createdAt") val createdAt: String,
-    @SerializedName("user") val user: CommentUserResponse
+    @SerializedName("userId") val userId: Long? = null,
+    @SerializedName("login") val login: String? = null
 ) : Parcelable
 
 @Parcelize

@@ -5,6 +5,7 @@ import ru.kafpin.repositories.AuthRepository
 import ru.kafpin.repositories.BookDetailsRepository
 import ru.kafpin.repositories.BookRepository
 import ru.kafpin.repositories.BookingRepository
+import ru.kafpin.repositories.CommentRepository
 import ru.kafpin.repositories.OrderRepository
 import ru.kafpin.repositories.ProfileRepository
 
@@ -15,6 +16,17 @@ object RepositoryProvider {
     private var _bookingRepository: BookingRepository? = null
 
     private var _profileRepository: ProfileRepository? = null
+
+    private var _commentRepository: CommentRepository? = null
+
+    fun getCommentRepository(
+        authRepository: AuthRepository,
+        context: Context
+    ): CommentRepository {
+        return _commentRepository ?: CommentRepository(authRepository, context).also {
+            _commentRepository = it
+        }
+    }
 
     fun getBookDetailsRepository(database: LibraryDatabase): BookDetailsRepository {
         return _bookDetailsRepository ?: BookDetailsRepository(

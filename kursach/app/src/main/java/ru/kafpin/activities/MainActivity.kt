@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import ru.kafpin.data.LibraryDatabase
 import ru.kafpin.data.RepositoryProvider
@@ -80,7 +81,15 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     }
 
     fun showComments(view: View) {
-        Toast.makeText(this, "Комментарии в разработке", Toast.LENGTH_SHORT).show()
+        if (networkMonitor.isOnline.value) {
+            CommentsActivity.start(this)
+        } else {
+            Snackbar.make(
+                binding.root,
+                "Нет подключения к интернету",
+                Snackbar.LENGTH_LONG
+            ).show()
+        }
     }
 
     fun showOrderList(view: View) {

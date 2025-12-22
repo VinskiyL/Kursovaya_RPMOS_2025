@@ -3,6 +3,7 @@ package ru.kafpin.repositories
 import android.util.Log
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
 import ru.kafpin.api.ApiClient
 import ru.kafpin.api.models.*
 import ru.kafpin.data.dao.AuthDao
@@ -369,5 +370,11 @@ class AuthRepository(
                 else -> "expired"
             }
         )
+    }
+
+    fun getCurrentUserSync(): UserEntity? {
+        return runBlocking {
+            userDao.getCurrentUser()
+        }
     }
 }
