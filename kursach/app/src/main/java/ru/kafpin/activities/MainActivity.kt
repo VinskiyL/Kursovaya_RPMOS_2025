@@ -75,7 +75,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     }
 
     fun showProfile(view: View) {
-        Toast.makeText(this, "Профиль в разработке", Toast.LENGTH_SHORT).show()
+        Log.d(TAG, "showProfile()")
+        ProfileActivity.start(this)
     }
 
     fun showComments(view: View) {

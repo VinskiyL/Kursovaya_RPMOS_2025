@@ -18,6 +18,9 @@
         android:theme="@style/Theme.Kursach"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".activities.ProfileActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.OrdersDetailActivity"
             android:exported="false" />
         <activity

@@ -8,6 +8,7 @@ import ru.kafpin.api.models.*
 import ru.kafpin.data.dao.AuthDao
 import ru.kafpin.data.dao.BookingDao
 import ru.kafpin.data.dao.OrderDao
+import ru.kafpin.data.dao.ProfileDao
 import ru.kafpin.data.dao.UserDao
 import ru.kafpin.data.mappers.toAuthSessionEntity
 import ru.kafpin.data.mappers.toUserEntity
@@ -19,6 +20,7 @@ class AuthRepository(
     private val userDao: UserDao,
     private val bookingDao: BookingDao,
     private val orderDao: OrderDao,
+    private val profileDao: ProfileDao,
     private val networkMonitor: NetworkMonitor
 ) {
     private val TAG = "AuthRepository"
@@ -267,6 +269,13 @@ class AuthRepository(
                 Log.e(TAG, "Ошибка при удалении заказов пользователя", e)
             }
 
+            try {
+                profileDao.deleteByUserId(userId)
+                Log.d(TAG, "🗑️ Удален профиль пользователя $userId")
+            } catch (e: Exception) {
+                Log.e(TAG, "Ошибка при удалении профиля пользователя", e)
+            }
+
             authDao.deleteSessionsForUser(userId)
             userDao.deleteUser(userId)
             Log.d(TAG, "🧹 Все данные пользователя удалены")
@@ -301,6 +310,13 @@ class AuthRepository(
             Log.d(TAG, "🗑️ Удалены заказы пользователя $userId (кроме LOCAL_PENDING)")
         } catch (e: Exception) {
             Log.e(TAG, "Ошибка при удалении заказов пользователя", e)
+        }
+
+        try {
+            profileDao.deleteByUserId(userId)
+            Log.d(TAG, "🗑️ Удален профиль пользователя $userId")
+        } catch (e: Exception) {
+            Log.e(TAG, "Ошибка при удалении профиля пользователя", e)
         }
 
         if (clearUserData) {

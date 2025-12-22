@@ -91,4 +91,54 @@ interface ApiService {
         @Body request: OrderCreateRequest,
         @Header("Authorization") token: String? = null
     ): Response<OrderResponse>
+
+    @GET("readers/me")
+    suspend fun getMyProfile(
+        @Header("Authorization") token: String? = null
+    ): Response<ReaderProfileResponse>
+
+    // Обновить профиль (аналог PUT /api/orders/{id})
+    @PUT("readers/me")
+    suspend fun updateProfile(
+        @Body request: ReaderUpdateRequest,
+        @Header("Authorization") token: String? = null
+    ): Response<ReaderProfileResponse>
+
+    // Изменить логин
+    @PUT("readers/me/login")
+    suspend fun changeLogin(
+        @Body request: ChangeLoginRequest,
+        @Header("Authorization") token: String? = null
+    ): Response<Void>
+
+    // Изменить пароль
+    @PUT("readers/me/password")
+    suspend fun changePassword(
+        @Body request: ChangePasswordRequest,
+        @Header("Authorization") token: String? = null
+    ): Response<Void>
+
+    @GET("comments")
+    suspend fun getAllComments(
+        @Header("Authorization") token: String? = null
+    ): Response<List<CommentResponse>>
+
+    @POST("comments")
+    suspend fun createComment(
+        @Body request: CommentCreateRequest,
+        @Header("Authorization") token: String? = null
+    ): Response<CommentResponse>
+
+    @PUT("comments/{id}")
+    suspend fun updateComment(
+        @Path("id") id: Long,
+        @Body request: CommentUpdateRequest,
+        @Header("Authorization") token: String? = null
+    ): Response<CommentResponse>
+
+    @DELETE("comments/{id}")
+    suspend fun deleteComment(
+        @Path("id") id: Long,
+        @Header("Authorization") token: String? = null
+    ): Response<Void>
 }

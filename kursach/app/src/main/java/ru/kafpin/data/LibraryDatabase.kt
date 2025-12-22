@@ -17,9 +17,10 @@ import ru.kafpin.data.models.*
         UserEntity::class,
         AuthSessionEntity::class,
         BookingEntity::class,
-        OrderEntity::class
+        OrderEntity::class,
+        ProfileEntity::class
     ],
-    version = 7,
+    version = 8,
     exportSchema = false
 )
 abstract class LibraryDatabase : RoomDatabase() {
@@ -34,6 +35,8 @@ abstract class LibraryDatabase : RoomDatabase() {
     abstract fun bookingDao(): BookingDao
 
     abstract fun orderDao(): OrderDao
+
+    abstract fun profileDao(): ProfileDao
 
     companion object {
         @Volatile

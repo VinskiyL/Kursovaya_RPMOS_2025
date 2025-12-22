@@ -37,25 +37,3 @@ enum class BookingStatus {
     ISSUED,     // Книга выдана (issued=true, returned=false)
     RETURNED    // Книга возвращена (issued=true, returned=true)
 }
-
-class Converters {
-    @TypeConverter
-    fun fromTimestamp(value: Long?): LocalDate? {
-        return value?.let { LocalDate.ofEpochDay(it) }
-    }
-
-    @TypeConverter
-    fun dateToTimestamp(date: LocalDate?): Long? {
-        return date?.toEpochDay()
-    }
-
-    @TypeConverter
-    fun fromBookingStatus(value: String): BookingStatus {
-        return BookingStatus.valueOf(value)
-    }
-
-    @TypeConverter
-    fun bookingStatusToString(status: BookingStatus): String {
-        return status.name
-    }
-}

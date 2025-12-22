@@ -28,7 +28,7 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
     protected val networkMonitor get() = (application as MyApplication).networkMonitor
 
     protected lateinit var btnBack: ImageButton
-    private lateinit var btnLogout: ImageButton
+    protected lateinit var btnLogout: ImageButton
 
 
     abstract fun inflateBinding(): VB
@@ -99,7 +99,7 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
         }
     }
 
-    private fun performLogout() {
+    protected fun performLogout() {
         lifecycleScope.launch {
             try {
                 val database = LibraryDatabase.getInstance(this@BaseActivity)

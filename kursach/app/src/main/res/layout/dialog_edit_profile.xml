@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Фамилия (обязательное) -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilSurname"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Фамилия *"
+            app:errorEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etSurname"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:maxLines="1"
+                android:textColor="@color/purple_200" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Имя (обязательное) -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilName"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Имя *"
+            app:errorEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:maxLines="1"
+                android:textColor="@color/purple_200" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Отчество (необязательное) -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilPatronymic"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Отчество">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPatronymic"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:maxLines="1"
+                android:textColor="@color/purple_200" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Дата рождения -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilBirthday"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Дата рождения (ГГГГ-ММ-ДД) *"
+            app:errorEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etBirthday"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:maxLines="1"
+                android:textColor="@color/purple_200" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Образование -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilEducation"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Образование *"
+            app:errorEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etEducation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:maxLines="1"
+                android:textColor="@color/purple_200" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Профессия -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilProfession"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Профессия">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etProfession"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:maxLines="1"
+                android:textColor="@color/purple_200" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Учебное заведение -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilEducationalInst"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Учебное заведение">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etEducationalInst"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:maxLines="1"
+                android:textColor="@color/purple_200" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Город -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilCity"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Город *"
+            app:errorEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etCity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:maxLines="1"
+                android:textColor="@color/purple_200" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Улица -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilStreet"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Улица *"
+            app:errorEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etStreet"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:maxLines="1"
+                android:textColor="@color/purple_200" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Дом -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilHouse"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Дом *"
+            app:errorEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etHouse"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:inputType="number"
+                android:maxLines="1"
+                android:textColor="@color/purple_200" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Корпус -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilBuildingHouse"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Корпус">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etBuildingHouse"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:maxLines="1"
+                android:textColor="@color/purple_200" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Квартира -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilFlat"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Квартира">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etFlat"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:inputType="number"
+                android:maxLines="1"
+                android:textColor="@color/purple_200" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Серия паспорта -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilPassportSeries"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Серия паспорта (4 цифры) *"
+            app:errorEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPassportSeries"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:inputType="number"
+                android:maxLines="1"
+                android:textColor="@color/purple_200" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Номер паспорта -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilPassportNumber"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Номер паспорта (6 цифр) *"
+            app:errorEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPassportNumber"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:inputType="number"
+                android:maxLines="1"
+                android:textColor="@color/purple_200" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Кем выдан -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilIssuedByWhom"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Кем выдан *"
+            app:errorEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etIssuedByWhom"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:maxLines="1"
+                android:textColor="@color/purple_200" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Дата выдачи -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilDateIssue"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Дата выдачи (ГГГГ-ММ-ДД) *"
+            app:errorEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etDateIssue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:maxLines="1"
+                android:textColor="@color/purple_200" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Телефон -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilPhone"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Телефон *"
+            app:errorEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPhone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:inputType="phone"
+                android:maxLines="1"
+                android:textColor="@color/purple_200" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Email -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilMail"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Email *"
+            app:errorEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etMail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionDone"
+                android:inputType="textEmailAddress"
+                android:maxLines="1"
+                android:textColor="@color/purple_200" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+    </LinearLayout>
+</ScrollView>
