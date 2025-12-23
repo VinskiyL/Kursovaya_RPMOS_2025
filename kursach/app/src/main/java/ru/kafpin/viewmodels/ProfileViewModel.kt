@@ -43,7 +43,6 @@ class ProfileViewModel(context: Context) : ViewModel() {
             }
         }
 
-        // ПОДПИСКА НА FLOW ПРОФИЛЯ
         viewModelScope.launch {
             try {
                 val userId = authRepository.getCurrentUserId()
@@ -51,14 +50,8 @@ class ProfileViewModel(context: Context) : ViewModel() {
                     _errorMessage.value = "Пользователь не авторизован"
                     return@launch
                 }
-
-                // Подписываемся на Flow (автообновление UI)
                 profileRepository.getProfileFlow(userId).collect { profileWithDetails ->
                     _profile.value = profileWithDetails
-
-                    // 🔥 ИСПРАВЛЕНИЕ 1: Убрана автоматическая загрузка с сервера
-                    // Теперь загрузка с сервера происходит только при явном вызове loadProfile()
-                    // или если профиля совсем нет в БД
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Ошибка в Flow профиля", e)
@@ -66,7 +59,6 @@ class ProfileViewModel(context: Context) : ViewModel() {
         }
     }
 
-    // 🔥 ИСПРАВЛЕНИЕ 2: Новый метод loadProfile() по аналогии с OrderDetailsViewModel
     suspend fun loadProfile() {
         _isLoading.value = true
         _errorMessage.value = null
@@ -106,7 +98,6 @@ class ProfileViewModel(context: Context) : ViewModel() {
         }
     }
 
-    // 🔥 ИСПРАВЛЕНИЕ 3: Переименован для ясности
     suspend fun fetchProfileFromServer() {
         _isLoading.value = true
         _errorMessage.value = null
@@ -252,9 +243,5 @@ class ProfileViewModel(context: Context) : ViewModel() {
     // ==================== УТИЛИТЫ ====================
     fun clearError() {
         _errorMessage.value = null
-    }
-
-    fun canEdit(): Boolean {
-        return _isOnline.value
     }
 }

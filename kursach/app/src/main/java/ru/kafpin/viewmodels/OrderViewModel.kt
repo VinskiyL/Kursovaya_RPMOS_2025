@@ -155,10 +155,6 @@ class OrderViewModel(private val context: Context) : ViewModel() {
         }
     }
 
-    fun setSearchQuery(query: String) {
-        _searchQuery.value = query
-    }
-
     suspend fun createOrder(
         title: String,
         authorSurname: String,
@@ -298,56 +294,6 @@ class OrderViewModel(private val context: Context) : ViewModel() {
         } catch (e: Exception) {
             _errorMessage.value = "Ошибка удаления: ${e.message}"
             Log.e(TAG, "Ошибка удаления заказа", e)
-            false
-        }
-    }
-
-    suspend fun updateOrder(
-        localId: Long,
-        title: String,
-        authorSurname: String,
-        authorName: String?,
-        authorPatronymic: String?,
-        quantity: Int,
-        year: String?
-    ): Boolean {
-        return try {
-            if (!canPerformAction()) {
-                _errorMessage.value = "Дождитесь завершения текущей операции"
-                return false
-            }
-
-            val order = orderRepository.getOrderWithDetails(localId)
-            if (order == null) {
-                _errorMessage.value = "Заказ не найден"
-                return false
-            }
-
-            if (!order.canEdit(networkMonitor.isOnline.value)) {
-                _errorMessage.value = "Этот заказ нельзя редактировать"
-                return false
-            }
-
-            if (order.order.status == OrderStatus.SERVER_PENDING && !_isOnline.value) {
-                _errorMessage.value = "Нет интернета. Редактирование невозможно."
-                return false
-            }
-
-            val result = orderRepository.updateLocalOrder(
-                localId = localId,
-                title = title,
-                authorSurname = authorSurname,
-                authorName = authorName,
-                authorPatronymic = authorPatronymic,
-                quantity = quantity,
-                datePublication = year
-            )
-
-            result.isSuccess
-
-        } catch (e: Exception) {
-            _errorMessage.value = "Ошибка обновления: ${e.message}"
-            Log.e(TAG, "Ошибка обновления заказа", e)
             false
         }
     }

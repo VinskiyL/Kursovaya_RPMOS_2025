@@ -91,4 +91,5 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx.v2110)
 
     implementation(libs.androidx.preference.ktx)
+    testImplementation(kotlin("test"))
 }

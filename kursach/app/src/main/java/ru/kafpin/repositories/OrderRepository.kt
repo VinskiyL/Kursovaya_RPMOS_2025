@@ -18,13 +18,6 @@ import ru.kafpin.data.models.OrderWithDetails
 import ru.kafpin.utils.NotificationHelper
 import java.time.LocalDate
 
-/**
- * Репозиторий для заказов. Аналог BookingRepository с упрощениями:
- * - Нет дат выдачи/возврата
- * - Нет связи с существующими книгами
- * - 3 статуса вместо 4
- * - Лимит 5 не-подтверждённых заказов
- */
 class OrderRepository(
     private val orderDao: OrderDao,
     private val authRepository: AuthRepository,
@@ -99,10 +92,6 @@ class OrderRepository(
     }
 
     // ==================== ЛОКАЛЬНЫЕ ОПЕРАЦИИ ====================
-
-    /**
-     * Создание локального заказа с проверкой лимита 5
-     */
     suspend fun createLocalOrder(
         title: String,
         authorSurname: String,
@@ -155,9 +144,6 @@ class OrderRepository(
         }
     }
 
-    /**
-     * Обновление локального заказа
-     */
     suspend fun updateLocalOrder(
         localId: Long,
         title: String,
@@ -211,18 +197,12 @@ class OrderRepository(
         }
     }
 
-    /**
-     * Удаление локального заказа
-     */
     suspend fun deleteLocalOrder(localId: Long) {
         withContext(Dispatchers.IO) {
             orderDao.deleteById(localId)
         }
     }
 
-    /**
-     * Пометить заказ на удаление (для синхронизации)
-     */
     suspend fun markForDeletion(localId: Long) {
         withContext(Dispatchers.IO) {
             val order = orderDao.findById(localId)
@@ -236,9 +216,6 @@ class OrderRepository(
         }
     }
 
-    /**
-     * Проверка можно ли создать новый заказ (лимит 5)
-     */
     suspend fun canCreateNewOrder(): Boolean {
         return withContext(Dispatchers.IO) {
             val userId = authRepository.getCurrentUserId() ?: return@withContext false
@@ -249,18 +226,12 @@ class OrderRepository(
 
     // ==================== ПОИСК И ПОЛУЧЕНИЕ ====================
 
-    /**
-     * Flow заказов пользователя для UI
-     */
     fun getOrdersByUserFlow(userId: Long): Flow<List<OrderWithDetails>> {
         return orderDao.getByUserIdFlow(userId).map { orders ->
             orders.map { OrderWithDetails(it) }
         }
     }
 
-    /**
-     * Получение заказа с деталями
-     */
     suspend fun getOrderWithDetails(localId: Long): OrderWithDetails? {
         return withContext(Dispatchers.IO) {
             val order = orderDao.findById(localId)
@@ -268,9 +239,6 @@ class OrderRepository(
         }
     }
 
-    /**
-     * Очистка старых LOCAL_PENDING заказов (например, старше 2 дней)
-     */
     suspend fun cleanupOldPendingOrders() {
         withContext(Dispatchers.IO) {
             try {
@@ -292,9 +260,6 @@ class OrderRepository(
 
     // ==================== СИНХРОНИЗАЦИЯ ====================
 
-    /**
-     * Синхронизация заказов (аналогично броням, но проще)
-     */
     suspend fun syncPendingOrders(): List<SyncResult> {
         if (_isSyncing.value) {
             Log.d(TAG, "Уже синхронизируемся, пропускаем")
@@ -356,9 +321,6 @@ class OrderRepository(
         }
     }
 
-    /**
-     * Получение заказов с сервера (этап 1)
-     */
     private suspend fun getRemoteOrders(): List<SyncResult> {
         val results = mutableListOf<SyncResult>()
 
@@ -419,9 +381,6 @@ class OrderRepository(
         }
     }
 
-    /**
-     * Обработка заказов с сервера
-     */
     private suspend fun processServerOrders(serverOrders: List<ru.kafpin.api.models.OrderResponse>) {
         Log.d(TAG, "Получено заказов с сервера: ${serverOrders.size}")
 
@@ -504,9 +463,6 @@ class OrderRepository(
         }
     }
 
-    /**
-     * Синхронизация удалений (этап 2)
-     */
     private suspend fun syncPendingDeletions(): List<SyncResult> {
         val results = mutableListOf<SyncResult>()
 
@@ -549,9 +505,6 @@ class OrderRepository(
         return results
     }
 
-    /**
-     * Синхронизация созданий (этап 3)
-     */
     private suspend fun syncPendingCreations(): List<SyncResult> {
         val results = mutableListOf<SyncResult>()
 

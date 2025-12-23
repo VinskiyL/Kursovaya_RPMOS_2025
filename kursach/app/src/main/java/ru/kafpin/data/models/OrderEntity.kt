@@ -30,11 +30,3 @@ enum class OrderStatus {
     SERVER_PENDING,
     CONFIRMED
 }
-
-class OrderConverters {
-    @TypeConverter
-    fun fromStatus(value: String): OrderStatus = OrderStatus.valueOf(value)
-
-    @TypeConverter
-    fun statusToString(status: OrderStatus): String = status.name
-}

@@ -78,29 +78,8 @@ class AuthRepository(
         }
     }
 
-    fun getCurrentUserFlow(): Flow<UserEntity?> {
-        return authDao.getActiveSessionFlow()
-            .map { session ->
-                session?.let { userDao.getUser(it.userId) }
-            }
-    }
-
-    suspend fun getAccessToken(): String? {
-        return authDao.getActiveSession()?.accessToken
-    }
-
-    fun getAccessTokenFlow(): Flow<String?> {
-        return authDao.getActiveSessionFlow()
-            .map { it?.accessToken }
-    }
-
     suspend fun isAuthenticated(): Boolean {
         return userDao.getCurrentUser() != null
-    }
-
-    fun isAuthenticatedFlow(): Flow<Boolean> {
-        return userDao.getCurrentUserFlow()
-            .map { it != null }
     }
 
     suspend fun hasValidTokenForApi(): Boolean {

@@ -19,13 +19,6 @@ data class OrderWithDetails(
             OrderStatus.CONFIRMED -> "Подтверждён"
         }
 
-    val statusColorRes: Int
-        get() = when (order.status) {
-            OrderStatus.LOCAL_PENDING -> android.R.color.holo_orange_light
-            OrderStatus.SERVER_PENDING -> android.R.color.holo_blue_light
-            OrderStatus.CONFIRMED -> android.R.color.holo_green_light
-        }
-
     val displayId: String
         get() = order.serverId?.toString() ?: "Локальный ${order.localId}"
 

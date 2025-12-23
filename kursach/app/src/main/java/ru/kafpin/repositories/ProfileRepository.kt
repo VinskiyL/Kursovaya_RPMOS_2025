@@ -27,11 +27,6 @@ class ProfileRepository(
     val isSyncing: Flow<Boolean> = _isSyncing
 
     // ==================== ЗАГРУЗКА С СЕРВЕРА ====================
-
-    /**
-     * Загрузить профиль с сервера и сохранить локально
-     * (вызывается при логине)
-     */
     suspend fun fetchProfileFromServer(): Result<ProfileEntity> {
         return withContext(Dispatchers.IO) {
             try {
@@ -72,19 +67,6 @@ class ProfileRepository(
     }
 
     // ==================== ПОЛУЧЕНИЕ ИЗ БД ====================
-
-    /**
-     * Получить профиль из локальной БД
-     */
-    suspend fun getProfile(userId: Long): ProfileEntity? {
-        return withContext(Dispatchers.IO) {
-            profileDao.findByUserId(userId)
-        }
-    }
-
-    /**
-     * Flow профиля для UI
-     */
     fun getProfileFlow(userId: Long): Flow<ProfileWithDetails?> {
         return profileDao.getByUserIdFlow(userId).map { entity ->
             entity?.let { ProfileWithDetails(it) }
@@ -93,9 +75,6 @@ class ProfileRepository(
 
     // ==================== ОБНОВЛЕНИЕ ПРОФИЛЯ ====================
 
-    /**
-     * Обновить профиль (только онлайн)
-     */
     suspend fun updateProfile(profile: ProfileEntity): Result<ProfileEntity> {
         return withContext(Dispatchers.IO) {
             try {
@@ -208,17 +187,6 @@ class ProfileRepository(
                 Log.e(TAG, "Ошибка смены пароля", e)
                 Result.failure(e)
             }
-        }
-    }
-    // ==================== УДАЛЕНИЕ ====================
-
-    /**
-     * Удалить профиль при выходе
-     */
-    suspend fun deleteProfile(userId: Long) {
-        withContext(Dispatchers.IO) {
-            profileDao.deleteByUserId(userId)
-            Log.d(TAG, "🗑️ Профиль удалён для userId: $userId")
         }
     }
 }

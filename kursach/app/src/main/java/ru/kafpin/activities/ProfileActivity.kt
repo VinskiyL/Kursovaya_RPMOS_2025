@@ -36,7 +36,6 @@ class ProfileActivity : BaseActivity<ActivityProfileBinding>() {
         setupClickListeners()
         setupNetworkObserver()
 
-        // Загрузка профиля при старте
         loadProfile()
     }
 
@@ -107,7 +106,6 @@ class ProfileActivity : BaseActivity<ActivityProfileBinding>() {
             showChangePasswordDialog()
         }
 
-        // Кнопка повтора вызывает loadProfile()
         binding.btnRetry.setOnClickListener {
             loadProfile()
         }
@@ -209,10 +207,6 @@ class ProfileActivity : BaseActivity<ActivityProfileBinding>() {
         binding.progressBar.isVisible = false
     }
 
-    /**
-     * 🔥 НОВЫЙ МЕТОД: Блокировка интерфейса перед авто-логоутом
-     * Отключаем все кнопки, чтобы пользователь не мог ничего сделать
-     */
     private fun lockUIForLogout() {
         // Блокируем кнопки в контенте
         binding.btnEditProfile.isEnabled = false
@@ -228,9 +222,6 @@ class ProfileActivity : BaseActivity<ActivityProfileBinding>() {
         setToolbarTitle("Выход через 5 сек...")
     }
 
-    /**
-     * 🔥 НОВЫЙ МЕТОД: Разблокировка интерфейса (на всякий случай)
-     */
     private fun unlockUI() {
         binding.btnEditProfile.isEnabled = true
         binding.btnChangeLogin.isEnabled = true
@@ -243,25 +234,18 @@ class ProfileActivity : BaseActivity<ActivityProfileBinding>() {
         setToolbarTitle("Мой профиль")
     }
 
-    /**
-     * 🔥 НОВЫЙ МЕТОД: Автоматический выход с задержкой
-     */
     private fun scheduleAutoLogout(message: String) {
-        // 1. Показываем сообщение
         Toast.makeText(
             this,
             "$message Выход через 5 секунд...",
             Toast.LENGTH_LONG
         ).show()
 
-        // 2. Блокируем интерфейс
         lockUIForLogout()
 
-        // 3. Запускаем таймер на 5 секунд
         lifecycleScope.launch {
             delay(5000) // 5 секунд
 
-            // 4. Выполняем логаут (тот же метод, что и при нажатии кнопки "Выйти")
             performLogout()
         }
     }
@@ -278,7 +262,6 @@ class ProfileActivity : BaseActivity<ActivityProfileBinding>() {
             val currentPassword = etCurrentPassword.text.toString()
             val newLogin = etNewLogin.text.toString()
 
-            // Валидация
             if (currentPassword.isEmpty()) {
                 Toast.makeText(this, "Введите текущий пароль", Toast.LENGTH_SHORT).show()
                 return@setPositiveButton
@@ -321,7 +304,6 @@ class ProfileActivity : BaseActivity<ActivityProfileBinding>() {
             val newPassword = etNewPassword.text.toString()
             val confirmPassword = etConfirmPassword.text.toString()
 
-            // Валидация
             if (currentPassword.isEmpty()) {
                 Toast.makeText(this, "Введите текущий пароль", Toast.LENGTH_SHORT).show()
                 return@setPositiveButton
@@ -342,7 +324,6 @@ class ProfileActivity : BaseActivity<ActivityProfileBinding>() {
             lifecycleScope.launch {
                 val success = viewModel.changePassword(currentPassword, newPassword)
                 if (success) {
-                    // 🔥 ИСПРАВЛЕНИЕ: Авто-логоут после смены пароля
                     scheduleAutoLogout("Пароль изменён.")
                 } else {
                     Toast.makeText(

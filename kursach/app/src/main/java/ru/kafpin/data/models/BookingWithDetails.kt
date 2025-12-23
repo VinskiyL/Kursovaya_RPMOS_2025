@@ -27,13 +27,6 @@ data class BookingWithDetails(
             BookingStatus.RETURNED
         )
 
-    val canCreateNew: Boolean
-        get() = booking.status in listOf(
-            BookingStatus.RETURNED,
-            BookingStatus.CONFIRMED
-        )
-
-    // Добавим полезные свойства
     val isOverdue: Boolean
         get() {
             return if (booking.status == BookingStatus.ISSUED) {

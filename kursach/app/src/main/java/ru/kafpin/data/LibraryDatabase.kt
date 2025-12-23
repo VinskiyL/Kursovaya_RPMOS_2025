@@ -20,7 +20,7 @@ import ru.kafpin.data.models.*
         OrderEntity::class,
         ProfileEntity::class
     ],
-    version = 8,
+    version = 9,
     exportSchema = false
 )
 abstract class LibraryDatabase : RoomDatabase() {

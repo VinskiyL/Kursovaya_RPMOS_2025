@@ -56,8 +56,4 @@ class RegisterViewModel(
             }
         }
     }
-
-    fun resetState() {
-        _registerState.value = RegisterState.Idle
-    }
 }

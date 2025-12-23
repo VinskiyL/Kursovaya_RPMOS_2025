@@ -7,10 +7,6 @@ import androidx.fragment.app.DialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import ru.kafpin.databinding.DialogEditProfileBinding
 
-/**
- * ПОЛНЫЙ диалог для редактирования профиля.
- * Все поля, вся валидация по аналогии с CreateOrderDialog.
- */
 class EditProfileDialog : DialogFragment() {
 
     private lateinit var binding: DialogEditProfileBinding
