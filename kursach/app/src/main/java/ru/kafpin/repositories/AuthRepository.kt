@@ -257,6 +257,12 @@ class AuthRepository(
                 }
             }
             try {
+                userDao.deleteUser(userId)
+                Log.d(TAG, "🗑️ Удален пользователь $userId")
+            } catch (e: Exception) {
+                Log.e(TAG, "Ошибка при удалении пользователя", e)
+            }
+            try {
                 bookingDao.deleteAllExceptPendingByUserId(userId)
                 Log.d(TAG, "🗑️ Удалены все брони пользователя $userId")
             } catch (e: Exception) {
@@ -299,6 +305,12 @@ class AuthRepository(
         }
 
         authDao.deleteSessionsForUser(userId)
+        try {
+            userDao.deleteUser(userId)
+            Log.d(TAG, "🗑️ Удален пользователь $userId")
+        } catch (e: Exception) {
+            Log.e(TAG, "Ошибка при удалении пользователя", e)
+        }
         try {
             bookingDao.deleteAllExceptPendingByUserId(userId)
             Log.d(TAG, "🗑️ Удалены все брони пользователя $userId")
@@ -370,6 +382,45 @@ class AuthRepository(
                 else -> "expired"
             }
         )
+    }
+
+    suspend fun register(request: RegistrationRequest): Result<UserResponse> {
+        Log.d(TAG, "📝 Начинаем регистрацию пользователя: ${request.login}")
+
+        if (!networkMonitor.isOnline.value) {
+            Log.w(TAG, "📴 Нет подключения к сети, регистрация невозможна")
+            return Result.failure(Exception("Проверьте подключение к сети"))
+        }
+
+        return try {
+            Log.d(TAG, "📡 Отправляем запрос регистрации на сервер...")
+            val response = apiService.register(request)
+
+            if (!response.isSuccessful) {
+                val errorBody = response.errorBody()?.string() ?: ""
+                Log.e(TAG, "❌ Ошибка регистрации: код=${response.code()}, тело=$errorBody")
+
+                when (response.code()) {
+                    400 -> {
+                        return Result.failure(Exception("Ошибка валидации данных"))
+                    }
+                    409 -> {
+                        return Result.failure(Exception("Логин, почта или паспорт уже заняты"))
+                    }
+                    else -> {
+                        return Result.failure(Exception("Ошибка сервера: ${response.code()}"))
+                    }
+                }
+            }
+
+            val userResponse = response.body()!!
+            Log.d(TAG, "✅ Регистрация успешна: ${userResponse.login} (ID: ${userResponse.id})")
+            Result.success(userResponse)
+
+        } catch (e: Exception) {
+            Log.e(TAG, "💥 Ошибка при регистрации", e)
+            Result.failure(Exception("Проверьте подключение к сети"))
+        }
     }
 
     fun getCurrentUserSync(): UserEntity? {

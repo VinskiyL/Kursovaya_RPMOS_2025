@@ -1,4 +1,4 @@
-package ru.kafpin.ui
+package ru.kafpin.ui.comments
 
 import android.app.Dialog
 import android.os.Bundle

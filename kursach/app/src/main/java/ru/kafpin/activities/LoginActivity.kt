@@ -29,20 +29,6 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
         return ActivityLoginBinding.inflate(layoutInflater)
     }
 
-    override fun setupUI() {
-        Log.d(TAG, "setupUI()")
-
-        setToolbarTitle("Вход в систему")
-        setupToolbarButtons(
-            showBackButton = false,
-            showLogoutButton = false
-        )
-
-        setupLoginForm()
-        observeViewModel()
-        checkAuthentication()
-    }
-
     private fun checkAuthentication() {
         lifecycleScope.launch {
             Log.d(TAG, "🔍 Проверяем аутентификацию...")
@@ -174,10 +160,55 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
         finish()
     }
 
+    override fun setupUI() {
+        Log.d(TAG, "setupUI()")
+
+        setToolbarTitle("Вход в систему")
+        setupToolbarButtons(
+            showBackButton = false,
+            showLogoutButton = false
+        )
+
+        setupLoginForm()
+        setupRegistrationButton()
+        observeViewModel()
+        checkAuthentication()
+    }
+
+    private fun setupRegistrationButton() {
+        binding.btnRegistration.setOnClickListener {
+            if (networkMonitor.isOnline.value) {
+                RegisterActivity.start(this)
+            } else {
+                Toast.makeText(
+                    this,
+                    "Регистрация доступна только при подключении к интернету",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
+        lifecycleScope.launch {
+            networkMonitor.isOnline.collect { isOnline ->
+                binding.btnRegistration.isEnabled = isOnline
+                binding.btnRegistration.alpha = if (isOnline) 1.0f else 0.5f
+            }
+        }
+    }
+
     companion object {
+        private const val TAG = "LoginActivity"
+
         fun start(context: Context) {
             val intent = Intent(context, LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            context.startActivity(intent)
+        }
+
+        fun startWithLogin(context: Context, login: String) {
+            val intent = Intent(context, LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            intent.putExtra("login", login)
             context.startActivity(intent)
         }
     }

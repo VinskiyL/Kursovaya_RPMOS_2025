@@ -28,4 +28,7 @@
     <color name="status_order_pending">#FFA000</color>  <!-- Оранжевый для LOCAL_PENDING -->
     <color name="status_order_sent">#2196F3</color>     <!-- Синий для SERVER_PENDING -->
     <color name="status_order_confirmed">#4CAF50</color> <!-- Зелёный для CONFIRMED -->
+
+    <color name="outline_color">#9C27B0</color> <!-- Более темный для рамок -->
+    <color name="hint_color">#616161</color> <!-- Более темный для подсказок -->
 </resources>

@@ -18,7 +18,7 @@ import ru.kafpin.R
 import ru.kafpin.adapters.CommentsAdapter
 import ru.kafpin.api.models.CommentResponse
 import ru.kafpin.databinding.ActivityCommentsBinding
-import ru.kafpin.ui.CommentDialogFragment
+import ru.kafpin.ui.comments.CommentDialogFragment
 import ru.kafpin.viewmodels.CommentsViewModel
 import ru.kafpin.viewmodels.CommentsViewModelFactory
 

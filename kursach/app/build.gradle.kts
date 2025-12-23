@@ -72,6 +72,7 @@ dependencies {
     implementation(libs.androidx.room.runtime.v283)
     implementation(libs.androidx.room.ktx.v283)
     implementation(libs.activity)
+    implementation(libs.androidx.uiautomator)
     //noinspection KaptUsageInsteadOfKsp
     kapt(libs.androidx.room.compiler)
 

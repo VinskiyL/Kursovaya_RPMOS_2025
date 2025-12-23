@@ -141,4 +141,7 @@ interface ApiService {
         @Path("id") id: Long,
         @Header("Authorization") token: String? = null
     ): Response<Void>
+
+    @POST("auth/register")
+    suspend fun register(@Body request: RegistrationRequest): Response<UserResponse>
 }
