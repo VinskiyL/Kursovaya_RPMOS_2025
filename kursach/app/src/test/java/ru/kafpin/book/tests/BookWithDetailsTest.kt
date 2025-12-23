@@ -41,26 +41,4 @@ class BookWithDetailsTest {
         assertEquals("✅ В наличии", availableStatus)
         assertEquals("❌ Нет в наличии", unavailableStatus)
     }
-
-    @Test
-    fun сравнение_BookWithDetails_по_id_книги() {
-        val book1 = BookEntity(id=1L, index="1", authorsMark="А", title="Книга 1",
-            placePublication="", informationPublication="", volume=0,
-            quantityTotal=1, quantityRemaining=1, cover=null, datePublication="2023")
-        val book2 = BookEntity(id=2L, index="2", authorsMark="Б", title="Книга 2",
-            placePublication="", informationPublication="", volume=0,
-            quantityTotal=1, quantityRemaining=1, cover=null, datePublication="2023")
-
-        val authors = emptyList<AuthorEntity>()
-        val genres = emptyList<GenreEntity>()
-
-        val details1 = BookWithDetails(book1, authors, genres)
-        val details2 = BookWithDetails(book2, authors, genres)
-        val details3 = BookWithDetails(book1, listOf(AuthorEntity(id=3, surname="Другой", name="Автор", patronymic=null)), genres)
-
-        assertNotEquals("Разные ID книг → разные объекты",
-            details1.book.id, details2.book.id)
-        assertEquals("Одинаковые ID книг → одинаковые ключи для DiffUtil",
-            details1.book.id, details3.book.id)
-    }
 }

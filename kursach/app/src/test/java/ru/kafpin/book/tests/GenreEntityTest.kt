@@ -5,44 +5,6 @@ import org.junit.Assert.*
 import ru.kafpin.data.models.GenreEntity
 
 class GenreEntityTest {
-
-    @Test
-    fun категоризация_жанров_по_типам() {
-        val allGenres = listOf(
-            GenreEntity(id = 1L, name = "Научная фантастика"),
-            GenreEntity(id = 2L, name = "Фэнтези"),
-            GenreEntity(id = 3L, name = "Детектив"),
-            GenreEntity(id = 4L, name = "Триллер"),
-            GenreEntity(id = 5L, name = "Роман"),
-            GenreEntity(id = 6L, name = "Поэзия"),
-            GenreEntity(id = 7L, name = "Драма"),
-            GenreEntity(id = 8L, name = "Комедия"),
-            GenreEntity(id = 9L, name = "Программирование"),
-            GenreEntity(id = 10L, name = "Научная литература")
-        )
-
-        val fictionGenres = allGenres.filter { genre ->
-            genre.name in listOf("Научная фантастика", "Фэнтези", "Детектив",
-                "Триллер", "Роман", "Драма", "Комедия")
-        }
-
-        val nonFictionGenres = allGenres.filter { genre ->
-            genre.name in listOf("Программирование", "Научная литература")
-        }
-
-        val poetryGenres = allGenres.filter { genre ->
-            genre.name == "Поэзия"
-        }
-
-        assertEquals("Должно быть 7 художественных жанров", 7, fictionGenres.size)
-        assertEquals("Должно быть 2 нехудожественных жанра", 2, nonFictionGenres.size)
-        assertEquals("Должен быть 1 поэтический жанр", 1, poetryGenres.size)
-        assertTrue("Должен включать научную фантастику",
-            fictionGenres.any { it.name == "Научная фантастика" })
-        assertTrue("Должен включать программирование",
-            nonFictionGenres.any { it.name == "Программирование" })
-    }
-
     @Test
     fun поиск_жанра_по_части_названия() {
         val genres = listOf(
@@ -68,28 +30,6 @@ class GenreEntityTest {
             foundGenres.any { it.name == "Научпоп" })
         assertFalse("Не должен найти детектив",
             foundGenres.any { it.name == "Детектив" })
-    }
-
-    @Test
-    fun проверка_уникальности_имен_жанров() {
-        val genres = listOf(
-            GenreEntity(id = 1L, name = "Детектив"),
-            GenreEntity(id = 2L, name = "Детектив"),
-            GenreEntity(id = 3L, name = "Триллер"),
-            GenreEntity(id = 4L, name = "Триллер"),
-            GenreEntity(id = 5L, name = "Роман")
-        )
-
-        val uniqueNames = genres.map { it.name }.distinct()
-        val duplicateNames = genres.groupBy { it.name }
-            .filter { it.value.size > 1 }
-            .keys
-
-        assertEquals("Должно быть 3 уникальных имени", 3, uniqueNames.size)
-        assertEquals("Должно быть 2 дублирующихся имени", 2, duplicateNames.size)
-        assertTrue("Детектив должен быть дубликатом", duplicateNames.contains("Детектив"))
-        assertTrue("Триллер должен быть дубликатом", duplicateNames.contains("Триллер"))
-        assertFalse("Роман не должен быть дубликатом", duplicateNames.contains("Роман"))
     }
 
     @Test

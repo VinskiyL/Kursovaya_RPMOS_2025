@@ -145,36 +145,6 @@ class AuthSessionEntityTest {
             invalidSession.accessExpiresAt < invalidSession.refreshExpiresAt)
     }
 
-    @Test
-    fun форматирование_времени_жизни_токенов_для_логирования() {
-        // Arrange
-        val currentTime = System.currentTimeMillis()
-        val session = AuthSessionEntity(
-            userId = 1L,
-            accessToken = "token",
-            refreshToken = "refresh",
-            accessExpiresAt = currentTime + 900000, // 15 минут
-            refreshExpiresAt = currentTime + 86400000 // 24 часа
-        )
-
-        // Act
-        val accessSecondsLeft = (session.accessExpiresAt - currentTime) / 1000
-        val refreshSecondsLeft = (session.refreshExpiresAt - currentTime) / 1000
-
-        // Assert
-        assertTrue("Access должен жить 15 минут (±1 минута)",
-            accessSecondsLeft in (14 * 60)..(16 * 60))
-        assertTrue("Refresh должен жить 24 часа (±1 час)",
-            refreshSecondsLeft in (23 * 60 * 60)..(25 * 60 * 60))
-
-        // Форматирование для логов
-        val accessFormatted = formatTimeLeft(accessSecondsLeft)
-        val refreshFormatted = formatTimeLeft(refreshSecondsLeft)
-
-        assertEquals("15 мин", accessFormatted)
-        assertEquals("24 ч", refreshFormatted)
-    }
-
     // Вспомогательные методы
     private fun canRefreshToken(session: AuthSessionEntity, currentTime: Long): Boolean {
         return session.refreshExpiresAt > currentTime

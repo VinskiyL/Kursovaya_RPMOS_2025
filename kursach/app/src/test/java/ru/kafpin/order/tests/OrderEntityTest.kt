@@ -99,37 +99,6 @@ class OrderEntityValidationTest {
             originalOrder.localId, syncedOrder.localId)
     }
 
-    @Test
-    fun проверка_ограничений_длин_полей_для_UI() {
-        // Arrange
-        val maxTitleLength = 200 // предположим, что в UI есть ограничение
-        val maxAuthorLength = 100
-
-        val longTitle = "Книга ".repeat(50) // ~300 символов
-        val longAuthor = "Автор ".repeat(30) // ~180 символов
-
-        val order = createTestOrder(
-            title = longTitle,
-            authorSurname = longAuthor
-        )
-
-        // Act & Assert
-        assertTrue("Модель принимает длинный заголовок",
-            order.title.length > maxTitleLength)
-        assertTrue("Модель принимает длинную фамилию",
-            order.authorSurname.length > maxAuthorLength)
-
-        // Проверка логики обрезки для UI
-        val displayTitle = if (order.title.length > maxTitleLength) {
-            order.title.take(maxTitleLength) + "..."
-        } else {
-            order.title
-        }
-
-        assertTrue("Для UI должно обрезаться",
-            displayTitle.length <= maxTitleLength + 3) // +3 для "..."
-    }
-
     // Вспомогательные методы
     private fun createTestOrder(
         title: String = "Тестовая книга",

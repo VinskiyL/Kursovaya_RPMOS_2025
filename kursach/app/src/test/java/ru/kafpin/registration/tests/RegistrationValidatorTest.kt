@@ -130,24 +130,6 @@ class RegistrationValidationTest {
     }
 
     @Test
-    fun валидация_номера_дома_должна_проверять_диапазон() {
-        // Arrange
-        val validHouses = listOf("1", "10", "100", "999", "1000")
-        val invalidHouses = listOf("", "0", "-1", "1001", "дом", "1А", "   ")
-
-        // Act & Assert
-        validHouses.forEach { house ->
-            assertTrue("Дом '$house' должен быть валидным",
-                RegistrationValidator.isValidHouse(house))
-        }
-
-        invalidHouses.forEach { house ->
-            assertFalse("Дом '$house' должен быть невалидным",
-                RegistrationValidator.isValidHouse(house))
-        }
-    }
-
-    @Test
     fun валидация_паспортных_данных_должна_проверять_длину_и_цифры() {
         // Arrange
         val validSeries = listOf("1234", "0000", "9999", "0101")

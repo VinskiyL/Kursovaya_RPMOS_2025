@@ -157,9 +157,49 @@ class RegisterActivity : BaseActivity<ActivityRegisterBinding>() {
             isValid = false
         }
 
-        if (binding.etBirthday.text.toString().trim().isEmpty()) {
+        val birthdayText = binding.etBirthday.text.toString().trim()
+        if (birthdayText.isEmpty()) {
             binding.etBirthday.error = "Выберите дату рождения"
             isValid = false
+        } else {
+            selectedBirthday?.let { birthdayCalendar ->
+                val today = Calendar.getInstance()
+
+                // Проверка, что дата не в будущем
+                if (birthdayCalendar.after(today)) {
+                    binding.etBirthday.error = "Дата рождения не может быть в будущем"
+                    isValid = false
+                }
+
+                // Проверка минимального возраста (14 лет)
+                val minAgeCalendar = Calendar.getInstance().apply {
+                    add(Calendar.YEAR, -14)
+                }
+                if (birthdayCalendar.after(minAgeCalendar)) {
+                    binding.etBirthday.error = "Минимальный возраст - 18 лет"
+                    isValid = false
+                }
+
+                // Проверка максимального возраста (120 лет)
+                val maxAgeCalendar = Calendar.getInstance().apply {
+                    add(Calendar.YEAR, -120)
+                }
+                if (birthdayCalendar.before(maxAgeCalendar)) {
+                    binding.etBirthday.error = "Проверьте дату рождения"
+                    isValid = false
+                }
+            } ?: run {
+                // Если selectedBirthday не установлен, но поле заполнено
+                try {
+                    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                    dateFormat.parse(birthdayText)
+                    // Парсинг успешен, но нет Calendar объекта
+                    // Можно создать Calendar здесь для проверок
+                } catch (e: Exception) {
+                    binding.etBirthday.error = "Неверный формат даты"
+                    isValid = false
+                }
+            }
         }
 
         if (binding.spinnerEducation.selectedItemPosition == -1) {
